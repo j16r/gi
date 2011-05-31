@@ -16,7 +16,7 @@ public:
   void load_class(const std::string &file_name);
   void load_builtin_classes();
   void dump_classes() const;
-  boost::shared_ptr<giClass> lookup_class(const std::string &class_name);
+  giClass::giClassPtr lookup_class(const std::string &class_name);
 
 };
 
