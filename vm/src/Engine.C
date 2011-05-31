@@ -1,22 +1,27 @@
-#include "Class.H"
 #include "Engine.H"
-#include "Array.H"
-#include "File.H"
 #include "Nil.H"
+#include "Class.H"
+#include "Array.H"
+#include "String.H"
+#include "Exception.H"
+#include "File.H"
 
 void giEngine::load_class(const std::string &file_name) {
   std::string class_name = file_name.substr(0, file_name.find_last_of("."));
 
   fs::ifstream class_file(file_name);
-  boost::shared_ptr<giClass> new_class(new giClass(class_name, file_name, class_file));
+  giClassPtr new_class(new giClass(class_name, file_name, class_file));
   _classes[class_name] = new_class;
   std::cout << "Class loaded: " << new_class->name() << std::endl;
 }
 
 void giEngine::load_builtin_classes() {
-  _classes["Nil"] = boost::shared_ptr<giClass>(new giNil());
-  _classes["Array"] = boost::shared_ptr<giClass>(new giArray());
-  _classes["File"] = boost::shared_ptr<giClass>(new giFile());
+  _classes["Nil"] = giClassPtr(new giNil());
+  _classes["Class"] = giClassPtr(new giClass());
+  _classes["Array"] = giClassPtr(new giArray());
+  _classes["String"] = giClassPtr(new giString());
+  _classes["File"] = giClassPtr(new giFile());
+  _classes["Exception"] = giClassPtr(new giException());
 }
 
 void giEngine::dump_classes() const {
@@ -27,7 +32,7 @@ void giEngine::dump_classes() const {
   std::cout << std::endl;
 }
 
-giClass::ObjectPtr giEngine::lookup_class(const std::string &class_name) {
+giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
   ClassMap::iterator it = _classes.find(class_name);
   std::cout << "Looking up class " << class_name << std::endl;
   if(it == _classes.end()) {

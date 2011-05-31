@@ -14,11 +14,11 @@ public:
   giArray();
   ~giArray();
 
-  giClass::ObjectPtr instance(giClass::giArgumentList & args);
+  giClass::giClassPtr instance(giClass::giArgumentList & args);
 
   void constructor(giClass::giArgumentList & args);
-  giClass::ObjectPtr push(giClass::giArgumentList & args);
-  giClass::ObjectPtr pop(giClass::giArgumentList & args);
+  giClass::giClassPtr push(giClass::giArgumentList & args);
+  giClass::giClassPtr pop(giClass::giArgumentList & args);
 
   std::vector<giClassPtr>& data();
 };

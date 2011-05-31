@@ -9,7 +9,8 @@
 #include <map>
 namespace fs = boost::filesystem;
 
-#include "Object.H"
+class giClass;
+typedef boost::shared_ptr<giClass> giClassPtr;
 
 class giClass {
 
@@ -20,26 +21,25 @@ class giClass {
 
 public:
 
-  typedef boost::shared_ptr<giClass> ObjectPtr;
-  typedef std::map<std::string, ObjectPtr> giArgumentList;
-  typedef ObjectPtr (giClass::*giMethod)(giArgumentList & args);
+  typedef boost::shared_ptr<giClass> giClassPtr;
+  typedef std::map<std::string, giClassPtr> giArgumentList;
+  typedef giClassPtr (giClass::*giMethod)(giArgumentList & args);
   typedef std::map<std::string, giMethod > MethodMap;
 
   MethodMap _methods;
 
+  giClass();
   giClass(const std::string& name, const std::string& file_name);
   giClass(const std::string& name, const std::string& file_name, fs::ifstream & file);
 
   inline const std::string& name() const { return _name; }
 
-  virtual ObjectPtr instance(giClass::giArgumentList & args);
+  virtual giClassPtr instance(giClass::giArgumentList & args);
 
-  ObjectPtr invoke(const std::string & method_name, giClass::giArgumentList & args);
+  giClassPtr invoke(const std::string & method_name, giClass::giArgumentList & args);
 
   void constructor(giClass::giArgumentList & args) {};
   void destructor() {};
 };
-
-typedef boost::shared_ptr<giClass> giClassPtr;
 
 #endif // _CLASS_H_

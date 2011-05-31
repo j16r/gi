@@ -10,8 +10,8 @@ giArray::~giArray() {
 
 }
 
-giClass::ObjectPtr giArray::instance(giClass::giArgumentList & args) {
-  ObjectPtr new_instance(new giArray());
+giClass::giClassPtr giArray::instance(giClass::giArgumentList & args) {
+  giClassPtr new_instance(new giArray());
   new_instance->constructor(args);
   return new_instance;
 }
@@ -21,13 +21,13 @@ void giArray::constructor(giClass::giArgumentList & args) {
 
 }
 
-giClass::ObjectPtr giArray::push(giClass::giArgumentList & args) {
+giClass::giClassPtr giArray::push(giClass::giArgumentList & args) {
   std::cout << name() << " read" << std::endl;
   giClass::giArgumentList empty;
   return engine.lookup_class("Nil")->instance(empty);
 }
 
-giClass::ObjectPtr giArray::pop(giClass::giArgumentList & args) {
+giClass::giClassPtr giArray::pop(giClass::giArgumentList & args) {
   std::cout << name() << " write" << std::endl;
   giClass::giArgumentList empty;
   return engine.lookup_class("Nil")->instance(empty);

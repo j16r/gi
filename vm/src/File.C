@@ -7,8 +7,8 @@ giFile::giFile() : giClass("File", __FILE__) {
   _methods["write"] = (giClass::giMethod)&giFile::write;
 }
 
-giClass::ObjectPtr giFile::instance(giClass::giArgumentList & args) {
-  ObjectPtr new_instance(new giFile());
+giClass::giClassPtr giFile::instance(giClass::giArgumentList & args) {
+  giClassPtr new_instance(new giFile());
   new_instance->constructor(args);
   return new_instance;
 }
@@ -18,7 +18,7 @@ void giFile::constructor(giClass::giArgumentList & args) {
 
 }
 
-giClass::ObjectPtr giFile::read(giClass::giArgumentList & args) {
+giClass::giClassPtr giFile::read(giClass::giArgumentList & args) {
   std::cout << name() << " read" << std::endl;
 
   giClass::giArgumentList::iterator it = args.find("size");
@@ -34,7 +34,7 @@ giClass::ObjectPtr giFile::read(giClass::giArgumentList & args) {
   return engine.lookup_class("Nil")->instance(empty);
 }
 
-giClass::ObjectPtr giFile::write(giClass::giArgumentList & args) {
+giClass::giClassPtr giFile::write(giClass::giArgumentList & args) {
   std::cout << name() << " write" << std::endl;
   giClass::giArgumentList empty;
   return engine.lookup_class("Nil")->instance(empty);

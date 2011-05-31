@@ -10,7 +10,7 @@ LIB = -dead_strip \
 bin/%.o : src/%.C
 	$(GCC) $(INC) -c -o $@ $<
 
-bin/gi: bin/main.o bin/Array.o bin/Class.o bin/Engine.o bin/File.o
+bin/gi: bin/main.o bin/Array.o bin/Class.o bin/Engine.o bin/File.o bin/Exception.o bin/String.o
 	$(GCC) $(LIB) $(INC) -o $@ $^
 
 all: bin/gi

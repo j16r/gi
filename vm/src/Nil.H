@@ -9,9 +9,9 @@ public:
 
   giNil() : giClass("Nil", __FILE__) {};
 
-  ObjectPtr instance(giClass::giArgumentList & args) {
+  giClassPtr instance(giClass::giArgumentList & args) {
     std::cout << "Getting singleton Nil instance" << std::endl;
-    return ObjectPtr(this);
+    return giClassPtr(this);
   };
 };
 

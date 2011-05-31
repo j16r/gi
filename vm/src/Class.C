@@ -10,6 +10,11 @@
 #include <list>
 namespace fs = boost::filesystem;
 
+giClass::giClass() :
+  _name("Class"),
+  _file_name(__FILE__) {
+}
+
 giClass::giClass(const std::string& name, const std::string& file_name) :
   _name(name),
   _file_name(file_name) {
@@ -31,13 +36,13 @@ void giClass::process(const char * bytes, const std::streamsize& size) {
   std::cout << "Processing " << size << " bytes of bytecode:" << bytes << std::endl;
 }
 
-giClass::ObjectPtr giClass::instance(giClass::giArgumentList & args) {
-  ObjectPtr new_instance(new giClass("Class", __FILE__));
+giClass::giClassPtr giClass::instance(giClass::giArgumentList & args) {
+  giClassPtr new_instance(new giClass("Class", __FILE__));
   new_instance->invoke("constructor", args);
   return new_instance;
 }
 
-giClass::ObjectPtr giClass::invoke(const std::string & method_name, giClass::giArgumentList & args) {
+giClass::giClassPtr giClass::invoke(const std::string & method_name, giClass::giArgumentList & args) {
   std::cout << "Invoking " << method_name << " with " << args.size() << " arguments" << std::endl;
   giMethod func = _methods[method_name];
   std::cout << "Function ptr " << func << std::endl;

@@ -20,11 +20,11 @@ public:
 
   giFile();
 
-  giClass::ObjectPtr instance(giClass::giArgumentList & args);
+  giClass::giClassPtr instance(giClass::giArgumentList & args);
 
   void constructor(giClass::giArgumentList & args);
-  giClass::ObjectPtr read(giClass::giArgumentList & args);
-  giClass::ObjectPtr write(giClass::giArgumentList & args);
+  giClass::giClassPtr read(giClass::giArgumentList & args);
+  giClass::giClassPtr write(giClass::giArgumentList & args);
 
 };
 
