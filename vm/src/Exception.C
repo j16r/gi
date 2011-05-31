@@ -10,8 +10,10 @@ giException::~giException() {
 void giException::constructor(giClass::giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
 
-  static giArgumentList arguments;
-  arguments["class"] = engine.lookup_class("Class");
-  arguments["filename"] = engine.lookup_class("String");
-  arguments["message"] = engine.lookup_class("String");
+  static giArgumentList required;
+  required["class"] = engine.lookup_class("Class");
+  required["filename"] = engine.lookup_class("String");
+  required["message"] = engine.lookup_class("String");
+
+  giClass::check_arguments(required, args);
 }

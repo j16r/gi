@@ -17,29 +17,32 @@ class giClass {
   const std::string _name;
   const std::string _file_name;
 
-  void process(const char * bytes, const std::streamsize& size);
+  void process(const char *, const std::streamsize&);
 
 public:
 
   typedef boost::shared_ptr<giClass> giClassPtr;
   typedef std::map<std::string, giClassPtr> giArgumentList;
   typedef giClassPtr (giClass::*giMethod)(giArgumentList & args);
-  typedef std::map<std::string, giMethod > MethodMap;
+  typedef std::map<std::string, giMethod> MethodMap;
 
   MethodMap _methods;
 
+  // ctors (internal)
   giClass();
-  giClass(const std::string& name, const std::string& file_name);
-  giClass(const std::string& name, const std::string& file_name, fs::ifstream & file);
+  giClass(const std::string&, const std::string&);
+  giClass(const std::string&, const std::string&, fs::ifstream &);
 
   inline const std::string& name() const { return _name; }
 
-  virtual giClassPtr instance(giClass::giArgumentList & args);
+  virtual giClassPtr instance(giArgumentList &);
 
-  giClassPtr invoke(const std::string & method_name, giClass::giArgumentList & args);
+  giClassPtr invoke(const std::string &, giArgumentList &);
 
-  void constructor(giClass::giArgumentList & args) {};
+  void constructor(giArgumentList &) {};
   void destructor() {};
+
+  static void check_arguments(const giArgumentList & , const giArgumentList & );
 };
 
 #endif // _CLASS_H_

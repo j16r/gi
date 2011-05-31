@@ -2,6 +2,7 @@
 
 #include "Class.H"
 #include "Engine.H"
+#include "String.H"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -47,4 +48,40 @@ giClass::giClassPtr giClass::invoke(const std::string & method_name, giClass::gi
   giMethod func = _methods[method_name];
   std::cout << "Function ptr " << func << std::endl;
   return (this->*func)(args);
+}
+
+void giClass::check_arguments(const giArgumentList & required_arguments, const giArgumentList & actual_arguments) {
+  for(giArgumentList::const_iterator required = required_arguments.begin();
+      required != required_arguments.end();
+      ++required) {
+
+    giArgumentList::const_iterator actual = actual_arguments.find(required->first);
+
+    // Argument specified like (arg, ...
+    if(required->second == engine.lookup_class("Nil")) {
+      if(actual == actual_arguments.end()) {
+        // no default was specified and no argument was specified
+
+        giArgumentList exception_args;
+        exception_args["class"] = engine.lookup_class("Class");
+        exception_args["filename"] =
+          boost::dynamic_pointer_cast<giString>(engine.lookup_class("String"))->instance(__FILE__);
+        throw engine.lookup_class("Exception")->instance(exception_args);
+      }
+
+    // Argument specified like (arg: String, ...
+    } else if(actual != actual_arguments.end()) {
+      // TODO: needs to traverse up the tree
+      if(actual->second != required->second) {
+        // type mismatch exception
+
+      }
+
+      
+
+    } else {
+
+    }
+
+  }
 }
