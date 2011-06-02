@@ -2,12 +2,13 @@
 #define _NIL_H_
 
 #include "Class.H"
+#include "Gi.H"
 
 class giNil : public giClass {
 
 public:
 
-  giNil() : giClass("Nil", __FILE__) {};
+  giNil() : giClass(GI_NIL, __FILE__) {};
 
   giClassPtr instance(giClass::giArgumentList & args) {
     std::cout << "Getting singleton Nil instance" << std::endl;

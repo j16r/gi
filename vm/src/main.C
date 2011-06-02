@@ -3,11 +3,8 @@
 
 #include <execinfo.h>
 
-#include "Class.H"
-#include "Array.H"
 #include "Engine.H"
-#include "File.H"
-#include "Exception.H"
+#include "Gi.H"
 
 giEngine engine;
 
@@ -32,7 +29,7 @@ int main(int argc, char *argv[]) {
   giClass::giArgumentList empty;
 
   try {
-    engine.lookup_class("File")->invoke("read", empty);
+    engine.lookup_class(GI_FILE)->invoke("read", empty);
   } catch(giClass::giClassPtr exception) {
     std::cout << "caught exception " << boost::dynamic_pointer_cast<giException>(exception)->dump();
   }

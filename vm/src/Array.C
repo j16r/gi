@@ -1,7 +1,7 @@
 #include "Engine.H"
-#include "Array.H"
+#include "Gi.H"
 
-giArray::giArray() : giClass("Array", __FILE__) {
+giArray::giArray() : giClass(GI_ARRAY, __FILE__) {
   _methods["push"] = (giClass::giMethod)&giArray::push;
   _methods["pop"] = (giClass::giMethod)&giArray::pop;
 }
@@ -24,11 +24,11 @@ void giArray::constructor(giClass::giArgumentList & args) {
 giClass::giClassPtr giArray::push(giClass::giArgumentList & args) {
   std::cout << name() << " read" << std::endl;
   giClass::giArgumentList empty;
-  return engine.lookup_class("Nil")->instance(empty);
+  return engine.lookup_class(GI_NIL)->instance(empty);
 }
 
 giClass::giClassPtr giArray::pop(giClass::giArgumentList & args) {
   std::cout << name() << " write" << std::endl;
   giClass::giArgumentList empty;
-  return engine.lookup_class("Nil")->instance(empty);
+  return engine.lookup_class(GI_NIL)->instance(empty);
 }

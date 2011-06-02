@@ -1,7 +1,7 @@
 #include "Engine.H"
-#include "Exception.H"
+#include "Gi.H"
 
-giException::giException() : giClass("Exception", __FILE__) {
+giException::giException() : giClass(GI_EXCEPTION, __FILE__) {
 }
 
 giException::~giException() {
@@ -26,9 +26,9 @@ void giException::constructor(giClass::giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
 
   static giArgumentList required;
-  required["class"] = engine.lookup_class("Class");
-  required["filename"] = engine.lookup_class("String");
-  required["message"] = engine.lookup_class("String");
+  required["class"] = engine.lookup_class(GI_CLASS);
+  required["filename"] = engine.lookup_class(GI_STRING);
+  required["message"] = engine.lookup_class(GI_STRING);
 
   giClass::check_arguments(required, args);
 }

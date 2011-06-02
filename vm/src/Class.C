@@ -1,8 +1,7 @@
 #include <string>
 
-#include "Class.H"
 #include "Engine.H"
-#include "String.H"
+#include "Gi.H"
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -12,7 +11,7 @@
 namespace fs = boost::filesystem;
 
 giClass::giClass() :
-  _name("Class"),
+  _name(GI_CLASS),
   _file_name(__FILE__) {
 }
 
@@ -38,7 +37,7 @@ void giClass::process(const char * bytes, const std::streamsize& size) {
 }
 
 giClass::giClassPtr giClass::instance(giClass::giArgumentList & args) {
-  giClassPtr new_instance(new giClass("Class", __FILE__));
+  giClassPtr new_instance(new giClass(GI_CLASS, __FILE__));
   new_instance->invoke("constructor", args);
   return new_instance;
 }
@@ -58,15 +57,15 @@ void giClass::check_arguments(const giArgumentList & required_arguments, const g
     giArgumentList::const_iterator actual = actual_arguments.find(required->first);
 
     // Argument specified like (arg, ...
-    if(required->second == engine.lookup_class("Nil")) {
+    if(required->second == engine.lookup_class(GI_NIL)) {
       if(actual == actual_arguments.end()) {
         // no default was specified and no argument was specified
 
         giArgumentList exception_args;
-        exception_args["class"] = engine.lookup_class("Class");
+        exception_args["class"] = engine.lookup_class(GI_CLASS);
         exception_args["filename"] =
-          boost::dynamic_pointer_cast<giString>(engine.lookup_class("String"))->instance(__FILE__);
-        throw engine.lookup_class("Exception")->instance(exception_args);
+          boost::dynamic_pointer_cast<giString>(engine.lookup_class(GI_STRING))->instance(__FILE__);
+        throw engine.lookup_class(GI_EXCEPTION)->instance(exception_args);
       }
 
     // Argument specified like (arg: String, ...

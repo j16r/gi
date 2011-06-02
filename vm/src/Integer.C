@@ -1,7 +1,7 @@
 #include "Engine.H"
-#include "Integer.H"
+#include "Gi.H"
 
-giInteger::giInteger() : giClass("Integer", __FILE__), _value(0) {
+giInteger::giInteger() : giClass(GI_INTEGER, __FILE__), _value(0) {
 }
 
 giInteger::~giInteger() {
@@ -23,7 +23,7 @@ void giInteger::constructor(giClass::giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
 
   static giArgumentList required;
-  required["value"] = engine.lookup_class("Integer");
+  required["value"] = engine.lookup_class(GI_INTEGER);
 
   giClass::check_arguments(required, args);
   _value = boost::dynamic_pointer_cast<giInteger>(args["value"])->value();

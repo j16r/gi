@@ -1,7 +1,7 @@
 #include "Engine.H"
-#include "String.H"
+#include "Gi.H"
 
-giString::giString() : giClass("String", __FILE__) {
+giString::giString() : giClass(GI_STRING, __FILE__) {
 }
 
 giString::~giString() {
@@ -23,7 +23,7 @@ void giString::constructor(giClass::giArgumentList & args) {
   giArgumentList::const_iterator argument = args.find("value");
 
   if(argument != args.end()) {
-    if(argument->second == engine.lookup_class("String")) {
+    if(argument->second == engine.lookup_class(GI_STRING)) {
       boost::shared_ptr<giString> string = boost::dynamic_pointer_cast<giString>(argument->second);
       _value = string->value();
     }
