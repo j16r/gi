@@ -46,6 +46,8 @@ giClass::giClassPtr giFile::read(giClass::giArgumentList & args) {
     size = boost::dynamic_pointer_cast<giInteger>(size_arg)->value();
   }
 
+  std::cout << "Reading " << size << " bytes" << std::endl;
+
   giClass::giClassPtr bytes(new giString());
   boost::dynamic_pointer_cast<giString>(bytes)->value().reserve(size);
   _file.read(&(boost::dynamic_pointer_cast<giString>(bytes)->value()[0]), size);

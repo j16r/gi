@@ -1,6 +1,13 @@
 #include "Engine.H"
 #include "Gi.H"
 
+giEngine::giEngine() : giClass(GI_ENGINE, __FILE__) {
+  _methods["lookup_class"] = (giClass::giMethod)&giEngine::func_lookup_class;
+}
+
+giEngine::~giEngine() {
+}
+
 void giEngine::load_class(const std::string &file_name) {
   std::string class_name = file_name.substr(0, file_name.find_last_of("."));
 
@@ -11,6 +18,7 @@ void giEngine::load_class(const std::string &file_name) {
 }
 
 void giEngine::load_builtin_classes() {
+  _classes[GI_ENGINE] = giClassPtr(this);
   _classes[GI_NIL] = giClassPtr(new giNil());
   _classes[GI_CLASS] = giClassPtr(new giClass());
   _classes[GI_ARRAY] = giClassPtr(new giArray());
@@ -42,4 +50,13 @@ giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
   }
 
   return it->second;
+}
+
+giClass::giClassPtr giEngine::func_lookup_class(giClass::giArgumentList & args) {
+  static giArgumentList required;
+  required["name"] = engine.lookup_class(GI_STRING);
+
+  giClass::check_arguments(required, args);
+
+  return lookup_class(boost::dynamic_pointer_cast<giString>(args["name"])->value());
 }

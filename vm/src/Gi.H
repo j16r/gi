@@ -13,3 +13,4 @@
 #define GI_FILE "File"
 #define GI_EXCEPTION "Exception"
 #define GI_INTEGER "Integer"
+#define GI_ENGINE "Engine"

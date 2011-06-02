@@ -14,7 +14,11 @@ giClass::giClassPtr giException::instance(giArgumentList & args) {
   return new_instance;
 }
 
-giClass::giClassPtr giException::instance(const std::string & class_name, const std::string & file_name, const std::string & message) {
+giClass::giClassPtr giException::instance(
+    const std::string & class_name,
+    const std::string & file_name,
+    const std::string & message) {
+
   giClassPtr new_instance(new giException());
   boost::dynamic_pointer_cast<giException>(new_instance)->set_class(class_name);
   boost::dynamic_pointer_cast<giException>(new_instance)->set_filename(file_name);
