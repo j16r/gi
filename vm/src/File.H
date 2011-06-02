@@ -14,6 +14,7 @@ namespace fs = boost::filesystem;
 
 class giFile : public giClass {
 
+  std::string _path;
   fs::fstream _file;
 
 public:

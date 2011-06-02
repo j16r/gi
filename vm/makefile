@@ -6,12 +6,13 @@ LIB = -dead_strip \
   -lboost_filesystem-mt \
   -lboost_program_options-mt \
   -lboost_thread-mt
+CFLAGS = -g -O0 -DDEBUG
 
 bin/%.o : src/%.C
-	$(GCC) $(INC) -c -o $@ $<
+	$(GCC) $(CFLAGS) $(INC) -c -o $@ $<
 
-bin/gi: bin/main.o bin/Array.o bin/Class.o bin/Engine.o bin/File.o bin/Exception.o bin/String.o
-	$(GCC) $(LIB) $(INC) -o $@ $^
+bin/gi: bin/main.o bin/Array.o bin/Class.o bin/Engine.o bin/File.o bin/Exception.o bin/String.o bin/Integer.o
+	$(GCC) $(CFLAGS) $(LIB) $(INC) -o $@ $^
 
 all: bin/gi
 

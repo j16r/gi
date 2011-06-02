@@ -17,7 +17,7 @@ public:
 
   void constructor(giClass::giArgumentList & args);
 
-  inline const std::string & value() const { return _value; };
+  inline std::string & value() { return _value; };
   inline const void value(const std::string & value) { _value = value; };
 };
 
