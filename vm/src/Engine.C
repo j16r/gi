@@ -7,7 +7,8 @@ giEngine::giEngine() : giClass(GI_ENGINE, __FILE__) {
 giEngine::~giEngine() {
 }
 
-void giEngine::load_class(const std::string &file_name) {
+void giEngine::load_class(
+    const std::string &file_name) {
   std::string class_name = file_name.substr(0, file_name.find_last_of("."));
 
   fs::ifstream class_file(file_name);
@@ -28,6 +29,7 @@ void giEngine::load_builtin_classes() {
 }
 
 void giEngine::dump_classes() const {
+
   std::vector<std::string> class_list;
   for(ClassMap::const_iterator it = _classes.begin(); it != _classes.end(); ++it) {
     class_list.push_back(it->second->name());
@@ -35,7 +37,9 @@ void giEngine::dump_classes() const {
   std::cout << "Classes loaded: " << boost::algorithm::join(class_list, ", ") << "." << std::endl;
 }
 
-giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
+giClass::giClassPtr giEngine::lookup_class(
+    const std::string &class_name) {
+
   ClassMap::iterator it = _classes.find(class_name);
   std::cout << "Looking up class " << class_name << std::endl;
 
@@ -51,6 +55,8 @@ giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
   return it->second;
 }
 
-giClass::giClassPtr giEngine::func_lookup_class(giClass::ArgumentList & args) {
+giClass::giClassPtr giEngine::func_lookup_class(
+    giClass::ArgumentList & args) {
+
   return lookup_class(boost::dynamic_pointer_cast<giString>(args.value("name"))->value());
 }

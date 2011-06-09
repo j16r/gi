@@ -1,18 +1,18 @@
 #include "includes.H"
 
 giClass::giClass() :
-  _name(GI_CLASS),
-  _file_name(__FILE__) {
+    _name(GI_CLASS),
+    _file_name(__FILE__) {
 }
 
 giClass::giClass(const std::string& name, const std::string& file_name) :
-  _name(name),
-  _file_name(file_name) {
+    _name(name),
+    _file_name(file_name) {
 }
 
 giClass::giClass(const std::string& name, const std::string& file_name, fs::ifstream & class_file) :
-  _name(name),
-  _file_name(file_name) {
+    _name(name),
+    _file_name(file_name) {
 
   char buffer[256] = {0};
   std::streamsize bytes = sizeof(buffer);
@@ -22,7 +22,10 @@ giClass::giClass(const std::string& name, const std::string& file_name, fs::ifst
   }
 }
 
-void giClass::process(const char * bytes, const std::streamsize& size) {
+void giClass::process(
+    const char * bytes,
+    const std::streamsize& size) {
+
   std::cout << "Processing " << size << " bytes of bytecode:" << bytes << std::endl;
 }
 
@@ -43,7 +46,9 @@ giClass::giClassPtr giClass::instance(
   return new_instance;
 }
 
-giClass::giClassPtr giClass::lookup(const std::string & identifier) {
+giClass::giClassPtr giClass::lookup(
+    const std::string & identifier) {
+
   std::cout << "Looking up identifier " << identifier << " on class " << name() << std::endl;
 
   Slot::iterator it = _slots.find(identifier);
