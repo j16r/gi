@@ -1,8 +1,7 @@
-#include "Engine.H"
-#include "Gi.H"
+#include "includes.H"
 
 giEngine::giEngine() : giClass(GI_ENGINE, __FILE__) {
-  _methods["lookup_class"] = (giClass::giMethod)&giEngine::func_lookup_class;
+  //_slots["lookup_class"] = (giClass::giMethod)&giEngine::func_lookup_class;
 }
 
 giEngine::~giEngine() {
@@ -29,11 +28,11 @@ void giEngine::load_builtin_classes() {
 }
 
 void giEngine::dump_classes() const {
-  std::cout << "Classes loaded: ";
+  std::vector<std::string> class_list;
   for(ClassMap::const_iterator it = _classes.begin(); it != _classes.end(); ++it) {
-    std::cout << it->second->name() << ", ";
+    class_list.push_back(it->second->name());
   }
-  std::cout << std::endl;
+  std::cout << "Classes loaded: " << boost::algorithm::join(class_list, ", ") << "." << std::endl;
 }
 
 giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
@@ -43,8 +42,8 @@ giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
   if(it == _classes.end()) {
 
     std::cout << "Unable to find class " << class_name << std::endl;
-    throw boost::dynamic_pointer_cast<giException>(engine.lookup_class(GI_EXCEPTION))->instance(
-        GI_CLASS,
+    throw EXCEPTION->instance(
+        _c(GI_ENGINE),
         __FILE__,
         std::string("Unable to find class ") + class_name);
   }
@@ -52,11 +51,6 @@ giClass::giClassPtr giEngine::lookup_class(const std::string &class_name) {
   return it->second;
 }
 
-giClass::giClassPtr giEngine::func_lookup_class(giClass::giArgumentList & args) {
-  static giArgumentList required;
-  required["name"] = engine.lookup_class(GI_STRING);
-
-  giClass::check_arguments(required, args);
-
-  return lookup_class(boost::dynamic_pointer_cast<giString>(args["name"])->value());
+giClass::giClassPtr giEngine::func_lookup_class(giClass::ArgumentList & args) {
+  return lookup_class(boost::dynamic_pointer_cast<giString>(args.value("name"))->value());
 }

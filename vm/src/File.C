@@ -1,47 +1,32 @@
-#include "Engine.H"
-#include "File.H"
-#include "Nil.H"
-#include "String.H"
-#include "Array.H"
-#include "Integer.H"
+#include "includes.H"
 
 giFile::giFile() : giClass(GI_FILE, __FILE__) {
-  _methods["read"] = (giClass::giMethod)&giFile::read;
-  _methods["write"] = (giClass::giMethod)&giFile::write;
+  //_methods["read"] = (giClass::giMethod)&giFile::read;
+  //_methods["write"] = (giClass::giMethod)&giFile::write;
 }
 
-giClass::giClassPtr giFile::instance(giClass::giArgumentList & args) {
+giClass::giClassPtr giFile::instance(giClass::ArgumentList & args) {
   giClassPtr new_instance(new giFile());
-  new_instance->constructor(args);
+  //new_instance->constructor(args);
   return new_instance;
 }
 
-void giFile::constructor(giClass::giArgumentList & args) {
+void giFile::constructor(giClass::ArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
-
-  static giArgumentList required;
-  required["path"] = engine.lookup_class(GI_STRING);
-
-  giClass::check_arguments(required, args);
-  _path = boost::dynamic_pointer_cast<giString>(args["path"])->value();
+  _path = boost::dynamic_pointer_cast<giString>(args.value("path"))->value();
 }
 
-giClass::giClassPtr giFile::read(giClass::giArgumentList & args) {
+giClass::giClassPtr giFile::read(giClass::ArgumentList & args) {
   std::cout << name() << " read" << std::endl;
 
-  static giArgumentList required;
-  required["size"] = engine.lookup_class(GI_INTEGER);
-
-  giClass::check_arguments(required, args);
-
   int size = 0;
-  giClass::giClassPtr size_arg = args["size"];
-  if(size_arg == engine.lookup_class(GI_NIL)) {
+  giClass::giClassPtr size_arg = args.value("size");
+  if(size_arg == NIL) {
 
     // No argument passed in, read whole file
     size = boost::filesystem::file_size(_path);
 
-  } else if(size_arg == engine.lookup_class(GI_INTEGER)) {
+  } else if(size_arg == ENGINE->lookup_class(GI_INTEGER)) {
 
     size = boost::dynamic_pointer_cast<giInteger>(size_arg)->value();
   }
@@ -55,8 +40,8 @@ giClass::giClassPtr giFile::read(giClass::giArgumentList & args) {
   return bytes;
 }
 
-giClass::giClassPtr giFile::write(giClass::giArgumentList & args) {
+giClass::giClassPtr giFile::write(giClass::ArgumentList & args) {
   std::cout << name() << " write" << std::endl;
-  giClass::giArgumentList empty;
-  return engine.lookup_class(GI_NIL)->instance(empty);
+
+  return NIL;
 }

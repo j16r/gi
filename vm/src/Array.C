@@ -1,34 +1,24 @@
-#include "Engine.H"
-#include "Gi.H"
+#include "includes.H"
 
 giArray::giArray() : giClass(GI_ARRAY, __FILE__) {
-  _methods["push"] = (giClass::giMethod)&giArray::push;
-  _methods["pop"] = (giClass::giMethod)&giArray::pop;
+  //_methods["push"] = (giClass::giMethod)&giArray::push;
+  //_methods["pop"] = (giClass::giMethod)&giArray::pop;
 }
 
 giArray::~giArray() {
 
 }
 
-giClass::giClassPtr giArray::instance(giClass::giArgumentList & args) {
-  giClassPtr new_instance(new giArray());
-  new_instance->constructor(args);
-  return new_instance;
-}
-
-void giArray::constructor(giClass::giArgumentList & args) {
+void giArray::constructor(giClass::ArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
-
 }
 
-giClass::giClassPtr giArray::push(giClass::giArgumentList & args) {
+giClass::giClassPtr giArray::push(giClass::ArgumentList & args) {
   std::cout << name() << " read" << std::endl;
-  giClass::giArgumentList empty;
-  return engine.lookup_class(GI_NIL)->instance(empty);
+  return NIL;
 }
 
-giClass::giClassPtr giArray::pop(giClass::giArgumentList & args) {
+giClass::giClassPtr giArray::pop(giClass::ArgumentList & args) {
   std::cout << name() << " write" << std::endl;
-  giClass::giArgumentList empty;
-  return engine.lookup_class(GI_NIL)->instance(empty);
+  return NIL;
 }

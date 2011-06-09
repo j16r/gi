@@ -1,14 +1,4 @@
-#include <string>
-
-#include "Engine.H"
-#include "Gi.H"
-
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <iostream>
-#include <string>
-#include <list>
-namespace fs = boost::filesystem;
+#include "includes.H"
 
 giClass::giClass() :
   _name(GI_CLASS),
@@ -36,51 +26,36 @@ void giClass::process(const char * bytes, const std::streamsize& size) {
   std::cout << "Processing " << size << " bytes of bytecode:" << bytes << std::endl;
 }
 
-giClass::giClassPtr giClass::instance(giClass::giArgumentList & args) {
-  giClassPtr new_instance(new giClass(GI_CLASS, __FILE__));
-  new_instance->invoke("constructor", args);
+giClass::giClassPtr giClass::instance(
+    giClassPtr sender,
+    ArgumentList &args) {
+
+  giClassPtr new_instance(create_instance());
+
+  std::cout << "Creating instance of " << new_instance->name() << std::endl;
+
+  giFunction *function(boost::dynamic_pointer_cast<giFunction>(new_instance->lookup("constructor")).get());
+  if(function) {
+    std::cout << new_instance->name() << " defines a constructor, invoking..." << std::endl;
+    function->invoke(ENGINE->lookup_class(GI_CLASS), NIL, args);
+  }
+
   return new_instance;
 }
 
-giClass::giClassPtr giClass::invoke(const std::string & method_name, giClass::giArgumentList & args) {
-  std::cout << "Invoking " << method_name << " with " << args.size() << " arguments" << std::endl;
-  giMethod func = _methods[method_name];
-  std::cout << "Function ptr " << func << std::endl;
-  return (this->*func)(args);
-}
+giClass::giClassPtr giClass::lookup(const std::string & identifier) {
+  std::cout << "Looking up identifier " << identifier << " on class " << name() << std::endl;
 
-void giClass::check_arguments(const giArgumentList & required_arguments, const giArgumentList & actual_arguments) {
-  for(giArgumentList::const_iterator required = required_arguments.begin();
-      required != required_arguments.end();
-      ++required) {
+  Slot::iterator it = _slots.find(identifier);
 
-    giArgumentList::const_iterator actual = actual_arguments.find(required->first);
+  if(it == _slots.end()) {
 
-    // Argument specified like (arg, ...
-    if(required->second == engine.lookup_class(GI_NIL)) {
-      if(actual == actual_arguments.end()) {
-        // no default was specified and no argument was specified
-
-        giArgumentList exception_args;
-        exception_args["class"] = engine.lookup_class(GI_CLASS);
-        exception_args["filename"] =
-          boost::dynamic_pointer_cast<giString>(engine.lookup_class(GI_STRING))->instance(__FILE__);
-        throw engine.lookup_class(GI_EXCEPTION)->instance(exception_args);
-      }
-
-    // Argument specified like (arg: String, ...
-    } else if(actual != actual_arguments.end()) {
-      // TODO: needs to traverse up the tree
-      if(actual->second != required->second) {
-        // type mismatch exception
-
-      }
-
-      
-
-    } else {
-
-    }
-
+    std::cout << "Unable to find identifier " << identifier << std::endl;
+    throw EXCEPTION->instance(
+        _c(GI_ENGINE),
+        __FILE__,
+        std::string("Unable to find identifier ") + identifier);
   }
+
+  return it->second;
 }

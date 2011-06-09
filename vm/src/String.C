@@ -1,5 +1,4 @@
-#include "Engine.H"
-#include "Gi.H"
+#include "includes.H"
 
 giString::giString() : giClass(GI_STRING, __FILE__) {
 }
@@ -7,9 +6,9 @@ giString::giString() : giClass(GI_STRING, __FILE__) {
 giString::~giString() {
 }
 
-giClass::giClassPtr giString::instance(giArgumentList & args) {
+giClass::giClassPtr giString::instance(ArgumentList & args) {
   giClassPtr new_instance(new giString());
-  new_instance->constructor(args);
+  //new_instance->constructor(args);
   return new_instance;
 }
 
@@ -19,13 +18,7 @@ giClass::giClassPtr giString::instance(const std::string & value) {
   return new_instance;
 }
 
-void giString::constructor(giClass::giArgumentList & args) {
-  giArgumentList::const_iterator argument = args.find("value");
-
-  if(argument != args.end()) {
-    if(argument->second == engine.lookup_class(GI_STRING)) {
-      boost::shared_ptr<giString> string = boost::dynamic_pointer_cast<giString>(argument->second);
-      _value = string->value();
-    }
-  }
+void giString::constructor(ArgumentList & args) {
+  boost::shared_ptr<giString> string = boost::dynamic_pointer_cast<giString>(args.value("value"));
+  _value = string->value();
 }

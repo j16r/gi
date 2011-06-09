@@ -1,17 +1,6 @@
 #ifndef _CLASS_H_
 #define _CLASS_H_
 
-#include <boost/filesystem.hpp>
-#include <boost/filesystem/fstream.hpp>
-#include <boost/shared_ptr.hpp>
-#include <vector>
-#include <string>
-#include <map>
-namespace fs = boost::filesystem;
-
-class giClass;
-typedef boost::shared_ptr<giClass> giClassPtr;
-
 class giClass {
 
   const std::string _name;
@@ -21,28 +10,31 @@ class giClass {
 
 public:
 
+  typedef enum { Private, Protected, Public } Visibility;
   typedef boost::shared_ptr<giClass> giClassPtr;
-  typedef std::map<std::string, giClassPtr> giArgumentList;
-  typedef giClassPtr (giClass::*giMethod)(giArgumentList & args);
-  typedef std::map<std::string, giMethod> MethodMap;
+  typedef giArgumentList<giClassPtr> ArgumentList;
+  typedef std::map<std::string, giClassPtr> Slot;
 
-  MethodMap _methods;
+protected:
 
-  // ctors (internal)
+  giClassPtr create_instance() const {
+    return giClassPtr(new giClass());
+  }
+
+public:
+
+  Slot _slots;
+
   giClass();
   giClass(const std::string&, const std::string&);
   giClass(const std::string&, const std::string&, fs::ifstream &);
+  inline virtual ~giClass() {};
 
   inline const std::string& name() const { return _name; }
 
-  virtual giClassPtr instance(giArgumentList &);
+  giClassPtr instance(giClassPtr, ArgumentList &);
 
-  giClassPtr invoke(const std::string &, giArgumentList &);
-
-  void constructor(giArgumentList &) {};
-  void destructor() {};
-
-  static void check_arguments(const giArgumentList & , const giArgumentList & );
+  giClassPtr lookup(const std::string &);
 };
 
 #endif // _CLASS_H_
