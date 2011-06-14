@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
   ENGINE->load_builtin_classes();
   ENGINE->dump_classes();
 
-  giClass::ArgumentList empty;
+  giClass::giArgumentList empty;
 
   try {
     giClass *file_class(boost::dynamic_pointer_cast<giClass>(ENGINE->lookup_class(GI_FILE)).get());

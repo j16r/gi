@@ -6,7 +6,7 @@ giString::giString() : giClass(GI_STRING, __FILE__) {
 giString::~giString() {
 }
 
-giClass::giClassPtr giString::instance(ArgumentList & args) {
+giClass::giClassPtr giString::instance(giArgumentList & args) {
   giClassPtr new_instance(new giString());
   //new_instance->constructor(args);
   return new_instance;
@@ -18,7 +18,7 @@ giClass::giClassPtr giString::instance(const std::string & value) {
   return new_instance;
 }
 
-void giString::constructor(ArgumentList & args) {
+void giString::constructor(giArgumentList & args) {
   boost::shared_ptr<giString> string = boost::dynamic_pointer_cast<giString>(args.value("value"));
   _value = string->value();
 }

@@ -18,9 +18,9 @@ public:
   giException();
   ~giException();
 
-  void constructor(ArgumentList & args);
+  void constructor(giArgumentList & args);
 
-  giClassPtr instance(ArgumentList &);
+  giClassPtr instance(giArgumentList &);
   giClassPtr instance(giClass::giClassPtr value, const std::string &, const std::string &);
 
   inline void set_class(giClass::giClassPtr value) { _class = value; }
@@ -32,9 +32,9 @@ public:
 
   std::string dump();
 
-  giClass::giClassPtr func_class(ArgumentList & args);
-  giClass::giClassPtr func_file(ArgumentList & args);
-  giClass::giClassPtr func_message(ArgumentList & args);
+  giClass::giClassPtr func_class(giArgumentList & args);
+  giClass::giClassPtr func_file(giArgumentList & args);
+  giClass::giClassPtr func_message(giArgumentList & args);
 };
 
 #endif // _EXCEPTION_H_

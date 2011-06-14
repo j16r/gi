@@ -9,16 +9,16 @@ giArray::~giArray() {
 
 }
 
-void giArray::constructor(giClass::ArgumentList & args) {
+void giArray::constructor(giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
 }
 
-giClass::giClassPtr giArray::push(giClass::ArgumentList & args) {
+giClass::giClassPtr giArray::push(giArgumentList & args) {
   std::cout << name() << " read" << std::endl;
   return NIL;
 }
 
-giClass::giClassPtr giArray::pop(giClass::ArgumentList & args) {
+giClass::giClassPtr giArray::pop(giArgumentList & args) {
   std::cout << name() << " write" << std::endl;
   return NIL;
 }

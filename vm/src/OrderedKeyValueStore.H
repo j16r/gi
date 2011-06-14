@@ -13,6 +13,8 @@ public:
 
   T lookup(size_t);
   T lookup(const std::string &);
+
+  inline size_t count() const { return _list.size(); }
 };
 
 #endif // _ORDERED_KEY_VALUE_STORE_H_

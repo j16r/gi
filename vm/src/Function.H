@@ -5,6 +5,7 @@ class giFunction : public giClass {
 
   Visibility _visibility;
   giArgumentSpecification _specification;
+  giMethod _method;
 
 protected:
 
@@ -16,11 +17,9 @@ public:
 
   giFunction();
 
-  typedef giClassPtr (giFunction::*giMethod)(ArgumentList & args);
+  giClassPtr instance(Visibility, giArgumentSpecification &, giMethod);
 
-  giClassPtr instance(Visibility, giArgumentSpecification &);
-
-  giClassPtr invoke(giClassPtr, giClassPtr, ArgumentList &);
+  giClassPtr invoke(giClassPtr, giClassPtr, giArgumentList &);
 
 };
 

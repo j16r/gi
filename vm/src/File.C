@@ -1,17 +1,25 @@
 #include "includes.H"
 
 giFile::giFile() : giClass(GI_FILE, __FILE__) {
-  //_methods["read"] = (giClass::giMethod)&giFile::read;
-  //_methods["write"] = (giClass::giMethod)&giFile::write;
+
+  giArgumentSpecification read_arg_spec;
+  read_arg_spec.add("size", NIL, ENGINE->lookup_class(GI_INTEGER));
+
+  _slots["read"] = FUNCTION->instance(Public, read_arg_spec, (giMethod)&giFile::read);
+
+  giArgumentSpecification write_arg_spec;
+  write_arg_spec.add("size", NIL, ENGINE->lookup_class(GI_INTEGER));
+
+  _slots["write"] = FUNCTION->instance(Public, write_arg_spec, (giMethod)&giFile::write);
 }
 
-giClass::giClassPtr giFile::instance(giClass::ArgumentList & args) {
+giClass::giClassPtr giFile::instance(giArgumentList & args) {
   giClassPtr new_instance(new giFile());
   //new_instance->constructor(args);
   return new_instance;
 }
 
-void giFile::constructor(giClass::ArgumentList & args) {
+void giFile::constructor(giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
   _path = boost::dynamic_pointer_cast<giString>(args.value("path"))->value();
 }
@@ -40,7 +48,7 @@ giClass::giClassPtr giFile::read(giClass::ArgumentList & args) {
   return bytes;
 }
 
-giClass::giClassPtr giFile::write(giClass::ArgumentList & args) {
+giClass::giClassPtr giFile::write(giArgumentList & args) {
   std::cout << name() << " write" << std::endl;
 
   return NIL;

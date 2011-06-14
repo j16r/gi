@@ -23,7 +23,7 @@ public:
 
   giClassPtr lookup_class(const std::string &class_name);
 
-  giClassPtr func_lookup_class(ArgumentList & args);
+  giClassPtr func_lookup_class(giArgumentList & args);
 };
 
 extern giClass::giClassPtr g_engine;

@@ -16,20 +16,20 @@ public:
   giInteger();
   ~giInteger();
 
-  giClass::giClassPtr instance(ArgumentList &);
+  giClass::giClassPtr instance(giArgumentList &);
   giClass::giClassPtr instance(int32_t);
 
-  void constructor(ArgumentList &);
+  void constructor(giArgumentList &);
 
   inline void value(int32_t value) { _value = value; };
   inline int32_t & value() { return _value; };
 
-  giClass::giClassPtr func_add(ArgumentList & args);
-  giClass::giClassPtr func_multiply(ArgumentList & args);
-  giClass::giClassPtr func_divide(ArgumentList & args);
-  giClass::giClassPtr func_subtract(ArgumentList & args);
-  giClass::giClassPtr func_factorial(ArgumentList & args);
-  giClass::giClassPtr func_modulus(ArgumentList & args);
+  giClass::giClassPtr func_add(giArgumentList & args);
+  giClass::giClassPtr func_multiply(giArgumentList & args);
+  giClass::giClassPtr func_divide(giArgumentList & args);
+  giClass::giClassPtr func_subtract(giArgumentList & args);
+  giClass::giClassPtr func_factorial(giArgumentList & args);
+  giClass::giClassPtr func_modulus(giArgumentList & args);
 };
 
 #endif // _INTEGER_H_

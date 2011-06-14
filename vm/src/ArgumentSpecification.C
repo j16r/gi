@@ -31,12 +31,12 @@ giClass::giClassPtr giArgumentSpecification::class_constraint(const std::string 
   return _values.lookup(name)->_class_constraint;
 }
 
-//void giArgumentSpecification::check_arguments(const ArgumentList & required_arguments, const ArgumentList & actual_arguments) {
-  //for(ArgumentList::const_iterator required = required_arguments.begin();
+//void giArgumentSpecification::check_arguments(const giArgumentList & required_arguments, const giArgumentList & actual_arguments) {
+  //for(giArgumentList::const_iterator required = required_arguments.begin();
       //required != required_arguments.end();
       //++required) {
 
-    //ArgumentList::const_iterator actual = actual_arguments.find(required->first);
+    //giArgumentList::const_iterator actual = actual_arguments.find(required->first);
 
     //// Argument specified like (arg, ...
     //if(required->second == _c(GI_NIL)) {

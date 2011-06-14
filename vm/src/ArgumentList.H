@@ -1,17 +1,22 @@
 #ifndef _ARGUMENT_LIST_H_
 #define _ARGUMENT_LIST_H_
 
-template<class T>
-class giArgumentList {
+#include "includes.H"
 
-  giOrderedKeyValueStore<T> _values;
+class giClass;
+
+class giArgumentList : giClass {
+
+  giOrderedKeyValueStore<giClass> _values;
 
 public:
 
-  giArgumentList& add(const std::string &, T&);
+  giArgumentList& add(const std::string &, giClassPtr);
 
-  T &value(size_t);
-  T &value(const std::string &);
+  giClassPtr value(size_t);
+  giClassPtr value(const std::string &);
+
+  size_t count() const { return _values.count(); }
 };
 
 #endif // _ARGUMENT_LIST_H_

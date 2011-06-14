@@ -16,10 +16,10 @@ public:
   giString();
   ~giString();
 
-  giClassPtr instance(ArgumentList &);
+  giClassPtr instance(giArgumentList &);
   giClassPtr instance(const std::string &);
 
-  void constructor(ArgumentList & args);
+  void constructor(giArgumentList & args);
 
   inline std::string & value() { return _value; };
   inline const void value(const std::string & value) { _value = value; };

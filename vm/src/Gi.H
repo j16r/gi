@@ -14,3 +14,4 @@
 
 #define NIL boost::dynamic_pointer_cast<giNil>(_c(GI_NIL))->instance()
 #define EXCEPTION boost::dynamic_pointer_cast<giException>(_c(GI_EXCEPTION))
+#define FUNCTION boost::dynamic_pointer_cast<giFunction>(_c(GI_FUNCTION))

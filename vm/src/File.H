@@ -16,11 +16,11 @@ public:
 
   giFile();
 
-  giClass::giClassPtr instance(ArgumentList & args);
+  giClass::giClassPtr instance(giArgumentList & args);
 
-  void constructor(ArgumentList & args);
-  giClass::giClassPtr read(ArgumentList & args);
-  giClass::giClassPtr write(ArgumentList & args);
+  void constructor(giArgumentList & args);
+  giClass::giClassPtr read(giArgumentList & args);
+  giClass::giClassPtr write(giArgumentList & args);
 
 };
 

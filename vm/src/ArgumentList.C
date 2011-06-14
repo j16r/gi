@@ -1,19 +1,16 @@
 #include "includes.H"
 
-template<class T>
-giArgumentList<T> &giArgumentList<T>::add(
+giArgumentList &giArgumentList::add(
     const std::string & name,
-    T &value) {
+    giClassPtr& value) {
 
   _values.add(name, value);
 }
 
-template<class T>
-T &giArgumentList<T>::value(size_t index) {
+giClass::giClassPtr giArgumentList::value(size_t index) {
   return _values.lookup(index);
 }
 
-template<class T>
-T &giArgumentList<T>::value(const std::string & name) {
+giClass::giClassPtr giArgumentList::value(const std::string & name) {
   return _values.lookup(name);
 }

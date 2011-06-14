@@ -18,7 +18,7 @@ giClass::giClassPtr giException::instance(
   return new_instance;
 }
 
-void giException::constructor(ArgumentList & args) {
+void giException::constructor(giArgumentList & args) {
   std::cout << name() << " constructor" << std::endl;
 }
 

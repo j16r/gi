@@ -1,6 +1,8 @@
 #ifndef _CLASS_H_
 #define _CLASS_H_
 
+class giArgumentList;
+
 class giClass {
 
   const std::string _name;
@@ -12,8 +14,8 @@ public:
 
   typedef enum { Private, Protected, Public } Visibility;
   typedef boost::shared_ptr<giClass> giClassPtr;
-  typedef giArgumentList<giClassPtr> ArgumentList;
   typedef std::map<std::string, giClassPtr> Slot;
+  typedef giClassPtr (giClass::*giMethod)(giArgumentList & args);
 
 protected:
 
@@ -32,7 +34,7 @@ public:
 
   inline const std::string& name() const { return _name; }
 
-  giClassPtr instance(giClassPtr, ArgumentList &);
+  giClassPtr instance(giClassPtr, giArgumentList &);
 
   giClassPtr lookup(const std::string &);
 };

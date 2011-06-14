@@ -56,7 +56,7 @@ giClass::giClassPtr giEngine::lookup_class(
 }
 
 giClass::giClassPtr giEngine::func_lookup_class(
-    giClass::ArgumentList & args) {
+    giArgumentList & args) {
 
   return lookup_class(boost::dynamic_pointer_cast<giString>(args.value("name"))->value());
 }

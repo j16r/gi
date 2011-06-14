@@ -13,7 +13,7 @@ public:
 
   giNil() : giClass(GI_NIL, __FILE__) {};
 
-  giClassPtr instance(ArgumentList & args) {
+  giClassPtr instance(giArgumentList & args) {
     std::cout << "Getting singleton Nil instance" << std::endl;
     return giClassPtr(this);
   };

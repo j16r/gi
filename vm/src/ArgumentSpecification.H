@@ -2,9 +2,8 @@
 #define _ARGUMENT_SPECIFICATION_H_
 
 class giClass;
-typedef boost::shared_ptr<giClass> giClassPtr;
 
-class giArgumentSpecification {
+class giArgumentSpecification : giClass {
 
   struct ArgumentHolder_t {
     giClassPtr _default_value;

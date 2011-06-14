@@ -31,7 +31,7 @@ void giClass::process(
 
 giClass::giClassPtr giClass::instance(
     giClassPtr sender,
-    ArgumentList &args) {
+    giArgumentList &args) {
 
   giClassPtr new_instance(create_instance());
 
