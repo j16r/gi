@@ -13,5 +13,11 @@ config.h.in
 config.log
 config.status
 configure
+compile
+depcomp
+install-sh
+missing
 libtool
 stamp-h1
+vm/src/gi
+vm/tests/check_gi
