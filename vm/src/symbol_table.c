@@ -4,6 +4,8 @@
 
 #include "symbol_table.h"
 
+#define DEFAULT_SIZE 1024
+
 int symbol_table_create(SymbolTable_t ** table) {
   assert(table);
 
@@ -31,8 +33,8 @@ int symbol_table_create(SymbolTable_t ** table) {
 int symbol_table_destroy(SymbolTable_t * table) {
   assert(table);
 
-  size_t index;
-  for(index = 0; index < table->count; index++) {
+  Symbol_t index;
+  for(index = 0; index < table->count; ++index) {
     free(table->symbols[index]);
   }
   free(table->symbols);
@@ -41,12 +43,12 @@ int symbol_table_destroy(SymbolTable_t * table) {
   return 0;
 }
 
-int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, size_t * identifier) {
+int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, Symbol_t * identifier) {
   assert(table);
   assert(identifier);
 
-  size_t index;
-  for(index = 0; index < table->count; index++) {
+  Symbol_t index;
+  for(index = 0; index < table->count; ++index) {
     if(wcscmp(symbol, table->symbols[index]) == 0) {
       table->counts[index] += 1;
       *identifier = index;
@@ -70,7 +72,7 @@ int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, size_t * ide
   return 0;
 }
 
-int symbol_table_lookup(SymbolTable_t * table, size_t identifier, wchar_t ** symbol) {
+int symbol_table_lookup(SymbolTable_t * table, Symbol_t identifier, wchar_t ** symbol) {
   assert(table);
   assert(symbol);
 
@@ -85,9 +87,10 @@ void symbol_table_dump(SymbolTable_t * table, FILE * output) {
   assert(table);
   assert(output);
 
-  fprintf(output, "Table size: %lu, items: %lu\n", table->size, table->count);
-  size_t index;
-  for(index = 0; index < table->count; index++) {
+  fprintf(output, "Symbol table, size: %lu, items: %lu\n", table->size, table->count);
+  Symbol_t index;
+  for(index = 0; index < table->count; ++index) {
     fprintf(output, "Item[%lu] (%lu) => %ls\n", index, table->counts[index], table->symbols[index]);
   }
+  fprintf(output, "\n");
 }

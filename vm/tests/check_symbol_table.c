@@ -6,12 +6,11 @@
 
 SymbolTable_t *symbols = NULL;
 
-void setup(void) {
+static void setup(void) {
   symbol_table_create(&symbols);
-  symbol_table_dump(symbols, stdout);
 }
 
-void teardown(void) {
+static void teardown(void) {
   symbol_table_dump(symbols, stdout);
   symbol_table_destroy(symbols);
 }
@@ -27,7 +26,7 @@ START_TEST(test_symbol_table_create) {
 
 START_TEST(test_symbol_table_add) {
 
-  size_t ident;
+  Symbol_t ident;
   fail_if(symbol_table_add(symbols, L"symbol", &ident));
   fail_unless(symbols->count == 1);
   fail_unless(symbols->counts[0] == 1);
@@ -71,14 +70,4 @@ Suite *symbol_table_test_suite(void) {
   suite_add_tcase(suite, tc_core);
 
   return suite;
-}
-
-int main(int argc, char *argv[]) {
-  int number_failed;
-  Suite *suite = symbol_table_test_suite();
-  SRunner *suite_runner = srunner_create(suite);
-  srunner_run_all(suite_runner, CK_NORMAL);
-  number_failed = srunner_ntests_failed(suite_runner);
-  srunner_free(suite_runner);
-  return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
