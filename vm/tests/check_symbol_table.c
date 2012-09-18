@@ -57,12 +57,12 @@ START_TEST(test_symbol_table_lookup) {
 
 } END_TEST
 
-Suite *symbol_table_test_suite(void) {
+Suite *make_symbol_table_test_suite(void) {
   Suite *suite = suite_create("symbol_table");
 
   /* Core test case */
-  TCase *tc_core = tcase_create("Core");
-  tcase_add_checked_fixture (tc_core, setup, teardown);
+  TCase *tc_core = tcase_create("symbol table core");
+  tcase_add_checked_fixture(tc_core, setup, teardown);
   tcase_add_test(tc_core, test_symbol_table_create);
   tcase_add_test(tc_core, test_symbol_table_add);
   tcase_add_test(tc_core, test_symbol_table_add_utf8);
