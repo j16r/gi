@@ -2,7 +2,8 @@
 #define _ENGINE_H_
 
 typedef struct {
-  int dummy;
+  int return_value;
+  char * current_instruction;
 } Engine_t;
 
 #endif

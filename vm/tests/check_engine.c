@@ -21,19 +21,28 @@ START_TEST(test_engine_create) {
 
 START_TEST(test_engine_run_noop) {
 
-  char bytecode = 0;
-  engine_run(engine, &bytecode);
+  char bytecode[] = {0, 1, 0};
+  engine_run(engine, bytecode);
+
+} END_TEST
+
+START_TEST(test_engine_return) {
+
+  char return_value = 0x7f;
+  char bytecode[] = {1, return_value};
+  engine_run(engine, bytecode);
+  fail_unless(engine_return_value(engine) == return_value);
 
 } END_TEST
 
 Suite *make_engine_test_suite(void) {
   Suite *suite = suite_create("engine");
 
-  /* Core test case */
   TCase *tc_core = tcase_create("engine core");
   tcase_add_checked_fixture(tc_core, setup, teardown);
   tcase_add_test(tc_core, test_engine_create);
   tcase_add_test(tc_core, test_engine_run_noop);
+  tcase_add_test(tc_core, test_engine_return);
   suite_add_tcase(suite, tc_core);
 
   return suite;

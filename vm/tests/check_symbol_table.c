@@ -11,7 +11,7 @@ static void setup(void) {
 }
 
 static void teardown(void) {
-  symbol_table_dump(symbols, stdout);
+  /*symbol_table_dump(symbols, stdout);*/
   symbol_table_destroy(symbols);
 }
 
@@ -60,7 +60,6 @@ START_TEST(test_symbol_table_lookup) {
 Suite *make_symbol_table_test_suite(void) {
   Suite *suite = suite_create("symbol_table");
 
-  /* Core test case */
   TCase *tc_core = tcase_create("symbol table core");
   tcase_add_checked_fixture(tc_core, setup, teardown);
   tcase_add_test(tc_core, test_symbol_table_create);
