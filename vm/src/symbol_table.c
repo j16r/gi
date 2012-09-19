@@ -6,7 +6,7 @@
 
 #define DEFAULT_SIZE 1024
 
-int symbol_table_create(SymbolTable_t ** table) {
+int symbol_table_create(SymbolTable_t **table) {
   assert(table);
 
   *table = malloc(sizeof(**table));
@@ -30,7 +30,7 @@ int symbol_table_create(SymbolTable_t ** table) {
   return 0;
 }
 
-int symbol_table_destroy(SymbolTable_t * table) {
+int symbol_table_destroy(SymbolTable_t *table) {
   assert(table);
 
   Symbol_t index;
@@ -43,7 +43,7 @@ int symbol_table_destroy(SymbolTable_t * table) {
   return 0;
 }
 
-int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, Symbol_t * identifier) {
+int symbol_table_add(SymbolTable_t *table, const wchar_t *symbol, Symbol_t *identifier) {
   assert(table);
   assert(identifier);
 
@@ -55,12 +55,12 @@ int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, Symbol_t * i
       return 0;
     }
   }
-  /* expand the symbol table as we have run out of space */
+  /*expand the symbol table as we have run out of space */
   if(index == table->size) {
     return 1;
   }
 
-  table->symbols[index] = (wchar_t *)malloc((wcslen(symbol) + 1) * sizeof(wchar_t));
+  table->symbols[index] = (wchar_t *)malloc((wcslen(symbol) + 1) *sizeof(wchar_t));
   if(table->symbols[index] == NULL) {
     return 1;
   }
@@ -72,7 +72,7 @@ int symbol_table_add(SymbolTable_t * table, const wchar_t * symbol, Symbol_t * i
   return 0;
 }
 
-int symbol_table_lookup(SymbolTable_t * table, Symbol_t identifier, wchar_t ** symbol) {
+int symbol_table_lookup(SymbolTable_t *table, Symbol_t identifier, wchar_t **symbol) {
   assert(table);
   assert(symbol);
 
@@ -83,7 +83,7 @@ int symbol_table_lookup(SymbolTable_t * table, Symbol_t identifier, wchar_t ** s
   return 1;
 }
 
-void symbol_table_dump(SymbolTable_t * table, FILE * output) {
+void symbol_table_dump(SymbolTable_t *table, FILE *output) {
   assert(table);
   assert(output);
 

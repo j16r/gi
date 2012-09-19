@@ -3,7 +3,7 @@
 
 typedef struct {
   int return_value;
-  char * current_instruction;
+  char *current_instruction;
 } Engine_t;
 
 #endif
