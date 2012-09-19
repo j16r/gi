@@ -27,13 +27,13 @@ START_TEST(test_symbol_table_create) {
 START_TEST(test_symbol_table_add) {
 
   Symbol_t ident;
-  fail_if(symbol_table_add(symbols, L"symbol", &ident));
+  fail_if(symbol_table_add(symbols, "symbol", &ident));
   fail_unless(symbols->count == 1);
   fail_unless(symbols->counts[0] == 1);
-  fail_if(symbol_table_add(symbols, L"new symbol", &ident));
+  fail_if(symbol_table_add(symbols, "new symbol", &ident));
   fail_unless(symbols->count == 2);
   fail_unless(symbols->counts[1] == 1);
-  fail_if(symbol_table_add(symbols, L"symbol", &ident));
+  fail_if(symbol_table_add(symbols, "symbol", &ident));
   fail_unless(symbols->count == 2);
   fail_unless(symbols->counts[0] == 2);
 
@@ -42,7 +42,7 @@ START_TEST(test_symbol_table_add) {
 START_TEST(test_symbol_table_add_utf8) {
 
   size_t ident;
-  fail_if(symbol_table_add(symbols, L"Schöne Grüße", &ident));
+  fail_if(symbol_table_add(symbols, "Schöne Grüße", &ident));
   fail_unless(symbols->count == 1);
 
 } END_TEST
@@ -50,10 +50,10 @@ START_TEST(test_symbol_table_add_utf8) {
 START_TEST(test_symbol_table_lookup) {
 
   size_t ident;
-  fail_if(symbol_table_add(symbols, L"new symbol", &ident));
-  wchar_t *symbol = NULL;
+  fail_if(symbol_table_add(symbols, "new symbol", &ident));
+  char *symbol = NULL;
   fail_if(symbol_table_lookup(symbols, ident, &symbol));
-  fail_if(wcscmp(L"new symbol", symbol));
+  fail_if(strcmp("new symbol", symbol));
 
 } END_TEST
 

@@ -43,13 +43,13 @@ int symbol_table_destroy(SymbolTable_t *table) {
   return 0;
 }
 
-int symbol_table_add(SymbolTable_t *table, const wchar_t *symbol, Symbol_t *identifier) {
+int symbol_table_add(SymbolTable_t *table, const char *symbol, Symbol_t *identifier) {
   assert(table);
   assert(identifier);
 
   Symbol_t index;
   for(index = 0; index < table->count; ++index) {
-    if(wcscmp(symbol, table->symbols[index]) == 0) {
+    if(strcmp(symbol, table->symbols[index]) == 0) {
       table->counts[index] += 1;
       *identifier = index;
       return 0;
@@ -60,19 +60,19 @@ int symbol_table_add(SymbolTable_t *table, const wchar_t *symbol, Symbol_t *iden
     return 1;
   }
 
-  table->symbols[index] = (wchar_t *)malloc((wcslen(symbol) + 1) *sizeof(wchar_t));
+  table->symbols[index] = (char *)malloc((strlen(symbol) + 1) *sizeof(char));
   if(table->symbols[index] == NULL) {
     return 1;
   }
 
-  wcscpy(table->symbols[index], symbol);
+  strcpy(table->symbols[index], symbol);
   table->counts[index] += 1;
   table->count += 1;
   *identifier = index;
   return 0;
 }
 
-int symbol_table_lookup(SymbolTable_t *table, Symbol_t identifier, wchar_t **symbol) {
+int symbol_table_lookup(SymbolTable_t *table, Symbol_t identifier, char **symbol) {
   assert(table);
   assert(symbol);
 
@@ -90,7 +90,7 @@ void symbol_table_dump(SymbolTable_t *table, FILE *output) {
   fprintf(output, "Symbol table, size: %lu, items: %lu\n", table->size, table->count);
   Symbol_t index;
   for(index = 0; index < table->count; ++index) {
-    fprintf(output, "Item[%lu] (%lu) => %ls\n", index, table->counts[index], table->symbols[index]);
+    fprintf(output, "Item[%lu] (%lu) => %s\n", index, table->counts[index], table->symbols[index]);
   }
   fprintf(output, "\n");
 }

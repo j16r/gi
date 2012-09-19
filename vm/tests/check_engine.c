@@ -1,6 +1,7 @@
-#include <stdlib.h>
 #include <check.h>
 
+#include "../src/gi.h"
+#include "../src/symbol_table.h"
 #include "../src/engine.h"
 
 Engine_t *engine = NULL;
@@ -35,6 +36,14 @@ START_TEST(test_engine_return) {
 
 } END_TEST
 
+START_TEST(test_engine_define_function) {
+
+  char bytecode[] = {2, 'd', 'e', 'f', 0, 1, 0};
+  engine_run(engine, bytecode);
+  fail_unless(engine->symbols->count == 1);
+
+} END_TEST
+
 Suite *make_engine_test_suite(void) {
   Suite *suite = suite_create("engine");
 
@@ -43,6 +52,7 @@ Suite *make_engine_test_suite(void) {
   tcase_add_test(tc_core, test_engine_create);
   tcase_add_test(tc_core, test_engine_run_noop);
   tcase_add_test(tc_core, test_engine_return);
+  tcase_add_test(tc_core, test_engine_define_function);
   suite_add_tcase(suite, tc_core);
 
   return suite;
