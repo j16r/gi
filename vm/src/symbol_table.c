@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <assert.h>
 
 #include "symbol_table.h"
@@ -30,7 +31,7 @@ int symbol_table_create(SymbolTable_t **table) {
   return 0;
 }
 
-int symbol_table_destroy(SymbolTable_t *table) {
+void symbol_table_destroy(SymbolTable_t *table) {
   assert(table);
 
   Symbol_t index;
@@ -39,8 +40,6 @@ int symbol_table_destroy(SymbolTable_t *table) {
   }
   free(table->symbols);
   free(table);
-
-  return 0;
 }
 
 int symbol_table_add(SymbolTable_t *table, const char *symbol, Symbol_t *identifier) {

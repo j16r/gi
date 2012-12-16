@@ -2,6 +2,7 @@
 
 #include "../src/gi.h"
 #include "../src/symbol_table.h"
+#include "../src/stack.h"
 #include "../src/engine.h"
 
 Engine_t *engine = NULL;
@@ -17,6 +18,8 @@ static void teardown(void) {
 START_TEST(test_engine_create) {
 
   fail_if(engine == NULL);
+  fail_if(engine->symbols == NULL);
+  fail_if(engine->stack == NULL);
 
 } END_TEST
 
@@ -43,6 +46,21 @@ START_TEST(test_engine_define_function) {
   fail_unless(engine->symbols->count == 1);
 
 } END_TEST
+
+START_TEST(test_engine_call_function) {
+
+  char bytecode[] = {2, 'd', 'e', 'f', 3, 'd', 'e', 'f', 1, 0};
+  engine_run(engine, bytecode);
+
+} END_TEST
+
+/*START_TEST(test_engine_load_module) {*/
+
+  /*char bytecode[] = {3, };*/
+  /*engine_run(engine, bytecode);*/
+  /*fail_unless();*/
+
+/*} END_TEST*/
 
 Suite *make_engine_test_suite(void) {
   Suite *suite = suite_create("engine");
