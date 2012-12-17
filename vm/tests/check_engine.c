@@ -2,6 +2,7 @@
 
 #include "../src/gi.h"
 #include "../src/symbol_table.h"
+#include "../src/symbol_map.h"
 #include "../src/stack.h"
 #include "../src/engine.h"
 
@@ -20,11 +21,13 @@ START_TEST(test_engine_create) {
   fail_if(engine == NULL);
   fail_if(engine->symbols == NULL);
   fail_if(engine->stack == NULL);
+  fail_if(engine->values == NULL);
 
 } END_TEST
 
 START_TEST(test_engine_run_noop) {
 
+  // 0 = opcode (noop)
   char bytecode[] = {0, 1, 0};
   engine_run(engine, bytecode);
 
@@ -33,6 +36,7 @@ START_TEST(test_engine_run_noop) {
 START_TEST(test_engine_return) {
 
   char return_value = 0x7f;
+  // 1 = opcode (return)
   char bytecode[] = {1, return_value};
   engine_run(engine, bytecode);
   fail_unless(engine_return_value(engine) == return_value);
@@ -41,6 +45,11 @@ START_TEST(test_engine_return) {
 
 START_TEST(test_engine_define_function) {
 
+  // 2 = opcode (def)
+  // def = function name
+  // z = string null terminator
+  // 1 = opcode (return)
+  // 0 = return value
   char bytecode[] = {2, 'd', 'e', 'f', 0, 1, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 1);
@@ -49,8 +58,18 @@ START_TEST(test_engine_define_function) {
 
 START_TEST(test_engine_call_function) {
 
-  char bytecode[] = {2, 'd', 'e', 'f', 3, 'd', 'e', 'f', 1, 0};
+  // 2 = opcode (def)
+  // def = function name
+  // z = string null terminator
+  // 2 = opcode (call)
+  // def = function name
+  // z = string null terminator
+  // 1 = opcode (return)
+  // 0 = return value
+  char bytecode[] = {2, 'd', 'e', 'f', 0, 3, 'd', 'e', 'f', 0, 1, 0};
   engine_run(engine, bytecode);
+  fail_unless(engine->symbols->count == 1);
+  fail_unless(*engine->current_instruction == 1);
 
 } END_TEST
 
@@ -71,6 +90,7 @@ Suite *make_engine_test_suite(void) {
   tcase_add_test(tc_core, test_engine_run_noop);
   tcase_add_test(tc_core, test_engine_return);
   tcase_add_test(tc_core, test_engine_define_function);
+  tcase_add_test(tc_core, test_engine_call_function);
   suite_add_tcase(suite, tc_core);
 
   return suite;

@@ -4,8 +4,9 @@
 typedef struct {
   int return_value;
   char *current_instruction;
-  SymbolTable_t * symbols;
-  Stack_t * stack;
+  SymbolTable_t *symbols;
+  Stack_t *stack;
+  SymbolMap_t *values;
 } Engine_t;
 
 #endif

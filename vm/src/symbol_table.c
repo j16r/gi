@@ -42,15 +42,16 @@ void symbol_table_destroy(SymbolTable_t *table) {
   free(table);
 }
 
-int symbol_table_add(SymbolTable_t *table, const char *symbol, Symbol_t *identifier) {
+int symbol_table_add(SymbolTable_t *table, const char *identifier, Symbol_t *symbol) {
   assert(table);
   assert(identifier);
+  assert(symbol);
 
   Symbol_t index;
   for(index = 0; index < table->count; ++index) {
-    if(strcmp(symbol, table->symbols[index]) == 0) {
+    if(strcmp(identifier, table->symbols[index]) == 0) {
       table->counts[index] += 1;
-      *identifier = index;
+      *symbol = index;
       return 0;
     }
   }
@@ -59,24 +60,24 @@ int symbol_table_add(SymbolTable_t *table, const char *symbol, Symbol_t *identif
     return 1;
   }
 
-  table->symbols[index] = (char *)malloc((strlen(symbol) + 1) *sizeof(char));
+  table->symbols[index] = (char *)malloc((strlen(identifier) + 1) *sizeof(char));
   if(table->symbols[index] == NULL) {
     return 1;
   }
 
-  strcpy(table->symbols[index], symbol);
+  strcpy(table->symbols[index], identifier);
   table->counts[index] += 1;
   table->count += 1;
-  *identifier = index;
+  *symbol = index;
   return 0;
 }
 
-int symbol_table_lookup(SymbolTable_t *table, Symbol_t identifier, char **symbol) {
+int symbol_table_lookup(SymbolTable_t *table, Symbol_t symbol, char **identifier) {
   assert(table);
-  assert(symbol);
+  assert(identifier);
 
-  if(identifier < table->count && table->symbols[identifier]) {
-    *symbol = table->symbols[identifier];
+  if(symbol < table->count && table->symbols[symbol]) {
+    *identifier = table->symbols[symbol];
     return 0;
   }
   return 1;

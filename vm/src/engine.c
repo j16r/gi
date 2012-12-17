@@ -1,5 +1,6 @@
 #include "gi.h"
 #include "symbol_table.h"
+#include "symbol_map.h"
 #include "stack.h"
 #include "engine.h"
 #include "engine_instructions.h"
@@ -8,20 +9,25 @@ int engine_step(Engine_t *, char *);
 
 void engine_create(Engine_t **engine) {
   *engine = malloc(sizeof(**engine));
+
   symbol_table_create(&(*engine)->symbols);
   stack_create(&(*engine)->stack);
+  symbol_map_create(&(*engine)->values);
+
   (*engine)->return_value = 0;
 }
 
 void engine_destroy(Engine_t *engine) {
+  symbol_map_destroy(engine->values);
+  stack_destroy(engine->stack);
+  symbol_table_destroy(engine->symbols);
+
   free(engine);
 }
 
 void engine_run(Engine_t *engine, char *program) {
-  for(engine->current_instruction = program;
-      engine_step(engine, engine->current_instruction);
-      ++engine->current_instruction)
-    ;
+  engine->current_instruction = program;
+  while(engine_step(engine, engine->current_instruction));
 }
 
 int engine_step(Engine_t *engine, char *program) {
