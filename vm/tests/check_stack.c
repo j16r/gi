@@ -16,6 +16,7 @@ static void teardown(void) {
 START_TEST(test_stack_create) {
 
   fail_if(stack == NULL);
+  fail_if(stack_empty(stack) == 0);
 
 } END_TEST
 
@@ -23,6 +24,7 @@ START_TEST(test_stack_push) {
 
   stack_push(stack, (ptr_t)0x666);
   fail_unless(*stack->top == (ptr_t)0x666);
+  fail_unless(stack_empty(stack) == 0);
 
 } END_TEST
 
@@ -30,6 +32,7 @@ START_TEST(test_stack_pop) {
 
   stack_push(stack, (ptr_t)0xbadbeef);
   fail_unless(stack_pop(stack) == (ptr_t)0xbadbeef);
+  fail_if(stack_empty(stack) == 0);
 
 } END_TEST
 

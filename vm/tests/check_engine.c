@@ -47,7 +47,7 @@ START_TEST(test_engine_define_function) {
 
   // 2 = opcode (def)
   // def = function name
-  // z = string null terminator
+  // 0 = string null terminator
   // 1 = opcode (return)
   // 0 = return value
   char bytecode[] = {2, 'd', 'e', 'f', 0, 1, 0};
@@ -60,13 +60,22 @@ START_TEST(test_engine_call_function) {
 
   // 2 = opcode (def)
   // def = function name
-  // z = string null terminator
-  // 2 = opcode (call)
-  // def = function name
-  // z = string null terminator
+  // 0 = string null terminator
+  // 2 = bytes to skip
   // 1 = opcode (return)
   // 0 = return value
-  char bytecode[] = {2, 'd', 'e', 'f', 0, 3, 'd', 'e', 'f', 0, 1, 0};
+  // 3 = opcode (call)
+  // def = function name
+  // 0 = string null terminator
+  // 1 = opcode (return)
+  // 0 = return value
+  char bytecode[] = {2, 'd', 'e', 'f', 0, 3, 0, 1, 0,
+                     3, 'd', 'e', 'f', 0,
+                     3, 'd', 'e', 'f', 0,
+                     3, 'd', 'e', 'f', 0,
+                     3, 'd', 'e', 'f', 0,
+                     3, 'd', 'e', 'f', 0,
+                     1, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 1);
   fail_unless(*engine->current_instruction == 1);

@@ -37,3 +37,7 @@ ptr_t stack_pop(Stack_t *stack) {
   stack->top += 1;
   return value;
 }
+
+int stack_empty(Stack_t *stack) {
+  return !(stack->top - (stack->buffer + DEFAULT_SIZE));
+}
