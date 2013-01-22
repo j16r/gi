@@ -5,5 +5,6 @@ int engine_instruction_return(Engine_t *, char *);
 void engine_instruction_noop(Engine_t *);
 void engine_instruction_not_supported(Engine_t *);
 void engine_instruction_define_function(Engine_t *, char *);
+void engine_raise_exception(Engine_t *);
 
 #endif

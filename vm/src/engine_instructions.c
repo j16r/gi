@@ -5,6 +5,8 @@
 #include "symbol_table.h"
 #include "symbol_map.h"
 #include "engine.h"
+#include "debugger.h"
+#include "engine_instructions.h"
 
 void engine_instruction_noop(Engine_t *engine) {
   printf(":noop\n");
@@ -29,10 +31,10 @@ void engine_instruction_not_supported(Engine_t *engine) {
 void engine_instruction_define_function(Engine_t *engine, char *arguments) {
   printf(":define function\n");
   Symbol_t symbol;
-  const char * function_name = arguments;
+  const char *function_name = arguments;
   size_t method_name_length = strlen(function_name) + 1;
 
-  size_t function_entry_point = engine->current_instruction + 1 +
+  const char *function_entry_point = engine->current_instruction + 1 +
     method_name_length + 1;
   symbol_table_add(engine->symbols, function_name, &symbol);
   symbol_map_add(engine->values, symbol, (void *)function_entry_point);
@@ -51,12 +53,20 @@ void engine_instruction_call_function(Engine_t *engine, char *arguments) {
   symbol_table_add(engine->symbols, function_name, &symbol);
   symbol_map_fetch(engine->values, symbol, (void *)&function_address);
 
-  char *return_address = engine->current_instruction + 1
-    + strlen(function_name) + 1;
-  stack_push(engine->stack, return_address);
-  engine->current_instruction = function_address;
+  if(function_address) {
+    char *return_address = engine->current_instruction + 1
+      + strlen(function_name) + 1;
+    stack_push(engine->stack, return_address);
+    engine->current_instruction = function_address;
+  } else {
+    engine_raise_exception(engine);
+  }
 }
 
-void engine_instruction_load_module(Engine_t * engine, char *arguments) {
+void engine_instruction_load_module(Engine_t *engine, char *arguments) {
   printf(":load module\n");
+}
+
+void engine_raise_exception(Engine_t *engine) {
+  unhandled_exception(engine);
 }

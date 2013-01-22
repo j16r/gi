@@ -82,6 +82,16 @@ START_TEST(test_engine_call_function) {
 
 } END_TEST
 
+START_TEST(test_engine_call_undefined_function) {
+
+  char bytecode[] = {OC_CALL, 'w', 'a', 'z', 0,
+                     OC_RETURN, 0};
+  engine_run(engine, bytecode);
+  fail_unless(engine->symbols->count == 0);
+  fail_unless(*engine->current_instruction == 1);
+
+} END_TEST
+
 /*START_TEST(test_engine_load_module) {*/
 
   /*char bytecode[] = {3, };*/
@@ -100,6 +110,7 @@ Suite *make_engine_test_suite(void) {
   tcase_add_test(tc_core, test_engine_return);
   tcase_add_test(tc_core, test_engine_define_function);
   tcase_add_test(tc_core, test_engine_call_function);
+  tcase_add_test(tc_core, test_engine_call_undefined_function);
   suite_add_tcase(suite, tc_core);
 
   return suite;
