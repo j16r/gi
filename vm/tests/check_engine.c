@@ -78,7 +78,7 @@ START_TEST(test_engine_call_function) {
                      OC_RETURN, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 1);
-  fail_unless(*engine->current_instruction == 1);
+  fail_unless(*engine->current_instruction == OC_RETURN);
 
 } END_TEST
 
@@ -88,7 +88,7 @@ START_TEST(test_engine_call_undefined_function) {
                      OC_RETURN, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 0);
-  fail_unless(*engine->current_instruction == 1);
+  fail_unless(*engine->current_instruction == OC_RETURN);
 
 } END_TEST
 

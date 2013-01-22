@@ -5,8 +5,6 @@
 #include "engine.h"
 #include "engine_instructions.h"
 
-int engine_step(Engine_t *, char *);
-
 void engine_create(Engine_t **engine) {
   *engine = malloc(sizeof(**engine));
 
@@ -27,7 +25,7 @@ void engine_destroy(Engine_t *engine) {
 
 void engine_run(Engine_t *engine, char *program) {
   engine->current_instruction = program;
-  while(engine_step(engine, engine->current_instruction));
+  while(!engine_step(engine, engine->current_instruction));
 }
 
 int engine_step(Engine_t *engine, char *program) {
@@ -40,7 +38,7 @@ int engine_step(Engine_t *engine, char *program) {
       break;
     case OC_RETURN:
       if(engine_instruction_return(engine, arguments)) {
-        return 0;
+        return ENG_RETURN;
       }
       break;
     case OC_DEF:
@@ -51,10 +49,10 @@ int engine_step(Engine_t *engine, char *program) {
       break;
     default:
       engine_instruction_not_supported(engine);
-      return 0;
+      return ENG_INVALID;
   };
 
-  return 1;
+  return ENG_CONTINUE;
 }
 
 int engine_return_value(Engine_t *engine) {

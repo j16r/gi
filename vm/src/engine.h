@@ -9,4 +9,12 @@ typedef struct {
   SymbolMap_t *values;
 } Engine_t;
 
+enum ENGINE_RETURN {
+  ENG_CONTINUE,
+  ENG_INVALID,
+  ENG_RETURN
+};
+
+int engine_step(Engine_t *, char *);
+
 #endif
