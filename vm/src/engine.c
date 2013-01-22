@@ -35,16 +35,23 @@ int engine_step(Engine_t *engine, char *program) {
   char *arguments = program + 1;
 
   switch(instruction) {
-    case 0: engine_instruction_noop(engine); break;
-    case 1:
+    case OC_NOOP:
+      engine_instruction_noop(engine);
+      break;
+    case OC_RETURN:
       if(engine_instruction_return(engine, arguments)) {
         return 0;
       }
       break;
-    case 2: engine_instruction_define_function(engine, arguments); break;
-    case 3: engine_instruction_call_function(engine, arguments); break;
-
-    default: engine_instruction_not_supported(engine); return 0;
+    case OC_DEF:
+      engine_instruction_define_function(engine, arguments);
+      break;
+    case OC_CALL:
+      engine_instruction_call_function(engine, arguments);
+      break;
+    default:
+      engine_instruction_not_supported(engine);
+      return 0;
   };
 
   return 1;

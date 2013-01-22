@@ -5,4 +5,6 @@
 #include <stdio.h>
 #include <assert.h>
 
+#include "opcodes.h"
+
 #endif

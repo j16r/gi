@@ -28,7 +28,7 @@ START_TEST(test_engine_create) {
 START_TEST(test_engine_run_noop) {
 
   // 0 = opcode (noop)
-  char bytecode[] = {0, 1, 0};
+  char bytecode[] = {OC_NOOP, 1, 0};
   engine_run(engine, bytecode);
 
 } END_TEST
@@ -37,7 +37,7 @@ START_TEST(test_engine_return) {
 
   char return_value = 0x7f;
   // 1 = opcode (return)
-  char bytecode[] = {1, return_value};
+  char bytecode[] = {OC_RETURN, return_value};
   engine_run(engine, bytecode);
   fail_unless(engine_return_value(engine) == return_value);
 
@@ -50,7 +50,7 @@ START_TEST(test_engine_define_function) {
   // 0 = string null terminator
   // 1 = opcode (return)
   // 0 = return value
-  char bytecode[] = {2, 'd', 'e', 'f', 0, 1, 0};
+  char bytecode[] = {OC_DEF, 'd', 'e', 'f', 0, OC_RETURN, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 1);
 
@@ -69,13 +69,13 @@ START_TEST(test_engine_call_function) {
   // 0 = string null terminator
   // 1 = opcode (return)
   // 0 = return value
-  char bytecode[] = {2, 'd', 'e', 'f', 0, 3, 0, 1, 0,
-                     3, 'd', 'e', 'f', 0,
-                     3, 'd', 'e', 'f', 0,
-                     3, 'd', 'e', 'f', 0,
-                     3, 'd', 'e', 'f', 0,
-                     3, 'd', 'e', 'f', 0,
-                     1, 0};
+  char bytecode[] = {OC_DEF, 'd', 'e', 'f', 0, 3, 0, OC_RETURN, 0,
+                     OC_CALL, 'd', 'e', 'f', 0,
+                     OC_CALL, 'd', 'e', 'f', 0,
+                     OC_CALL, 'd', 'e', 'f', 0,
+                     OC_CALL, 'd', 'e', 'f', 0,
+                     OC_CALL, 'd', 'e', 'f', 0,
+                     OC_RETURN, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count == 1);
   fail_unless(*engine->current_instruction == 1);
