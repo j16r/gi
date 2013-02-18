@@ -8,5 +8,6 @@
 void unhandled_exception(Engine_t *engine) {
   printf("Unhandled exception!\n");
   printf("Current instruction: %d\n", *engine->current_instruction);
+  symbol_table_dump(engine->symbols, stdout);
   exit(1);
 }

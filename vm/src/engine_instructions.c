@@ -17,6 +17,7 @@ int engine_instruction_return(Engine_t *engine, char *arguments) {
   printf(":return %d\n", (int)(*arguments) & 0xff);
   engine->return_value = *arguments;
   if(stack_empty(engine->stack)) {
+    printf("returning on empty stack, program over!\n");
     return 1;
   }
   ptr_t next_instruction = stack_pop(engine->stack);
@@ -54,19 +55,15 @@ void engine_instruction_call_function(Engine_t *engine, char *arguments) {
   symbol_map_fetch(engine->values, symbol, (void *)&function_address);
 
   if(function_address) {
-    char *return_address = engine->current_instruction + 1
-      + strlen(function_name) + 1;
+    char *return_address = engine->current_instruction + 1 +
+      strlen(function_name) + 1;
     stack_push(engine->stack, return_address);
     engine->current_instruction = function_address;
   } else {
-    engine_raise_exception(engine);
+    engine_instruction_raise_exception(engine, NULL);
   }
 }
 
-void engine_instruction_load_module(Engine_t *engine, char *arguments) {
-  printf(":load module\n");
-}
-
-void engine_raise_exception(Engine_t *engine) {
+void engine_instruction_raise_exception(Engine_t *engine, char *arguments) {
   unhandled_exception(engine);
 }
