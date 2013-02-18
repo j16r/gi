@@ -6,6 +6,7 @@ enum GI_OPCODES {
   OC_RETURN,
   OC_DEF,
   OC_CALL,
+  OC_REQUIRE,
 };
 
 #endif

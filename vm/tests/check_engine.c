@@ -92,13 +92,14 @@ START_TEST(test_engine_call_undefined_function) {
 
 } END_TEST
 
-/*START_TEST(test_engine_load_module) {*/
+START_TEST(test_engine_require) {
 
-  /*char bytecode[] = {3, };*/
-  /*engine_run(engine, bytecode);*/
-  /*fail_unless();*/
+  char bytecode[] = {OC_REQUIRE, 'c', 'o', 'r', 'e', 0,
+                     OC_RETURN, 0};
+  engine_run(engine, bytecode);
+  fail_unless(engine->symbols->count > 0);
 
-/*} END_TEST*/
+} END_TEST
 
 Suite *make_engine_test_suite(void) {
   Suite *suite = suite_create("engine");
@@ -111,6 +112,7 @@ Suite *make_engine_test_suite(void) {
   tcase_add_test(tc_core, test_engine_define_function);
   tcase_add_test(tc_core, test_engine_call_function);
   tcase_add_test(tc_core, test_engine_call_undefined_function);
+  tcase_add_test(tc_core, test_engine_require);
   suite_add_tcase(suite, tc_core);
 
   return suite;

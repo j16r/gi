@@ -47,6 +47,9 @@ int engine_step(Engine_t *engine, char *program) {
     case OC_CALL:
       engine_instruction_call_function(engine, arguments);
       break;
+    case OC_REQUIRE:
+      engine_instruction_require(engine, arguments);
+      break;
     default:
       engine_instruction_not_supported(engine);
       return ENG_INVALID;
