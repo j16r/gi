@@ -5,4 +5,5 @@
 #include <engine.h>
 
 int gi_required(Engine_t * engine) {
+  printf("Loaded core module!\n");
 };

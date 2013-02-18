@@ -94,7 +94,7 @@ START_TEST(test_engine_call_undefined_function) {
 
 START_TEST(test_engine_require) {
 
-  char bytecode[] = {OC_REQUIRE, 'c', 'o', 'r', 'e', 0,
+  char bytecode[] = {OC_REQUIRE, 'l', 'i', 'b', 'c', 'o', 'r', 'e', '.', 'd', 'y', 'l', 'i', 'b', 0,
                      OC_RETURN, 0};
   engine_run(engine, bytecode);
   fail_unless(engine->symbols->count > 0);

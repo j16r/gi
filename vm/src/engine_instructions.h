@@ -7,6 +7,5 @@ void engine_instruction_not_supported(Engine_t *);
 void engine_instruction_define_function(Engine_t *, char *);
 void engine_instruction_raise_exception(Engine_t *, char *);
 void engine_instruction_require(Engine_t *, char *);
-void engine_instruction_if(Engine_t *, char *);
 
 #endif

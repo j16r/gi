@@ -1,3 +1,3 @@
 #!/bin/sh
 [ ! -e ./test-driver ] && automake --add-missing
-make check VERBOSE=1
+make check VERBOSE=1 LD_LIBRARY_PATH=`pwd`/../lib/core/src/.libs/
