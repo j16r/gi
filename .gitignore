@@ -19,5 +19,9 @@ install-sh
 missing
 libtool
 stamp-h1
+vm/test-driver
 vm/src/gi
 vm/tests/check_gi
+vm/tests/check_gi.log
+vm/tests/check_gi.trs
+vm/tests/test-suite.log
