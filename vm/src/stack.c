@@ -28,13 +28,11 @@ void stack_destroy(Stack_t *stack) {
 }
 
 void stack_push(Stack_t *stack, ptr_t value) {
-  printf("Stack size: %d\n", stack->top);
   stack->top -= 1;
   *stack->top = value;
 }
 
 ptr_t stack_pop(Stack_t *stack) {
-  printf("Stack size: %d\n", stack->top);
   ptr_t value = *stack->top;
   stack->top += 1;
   return value;
