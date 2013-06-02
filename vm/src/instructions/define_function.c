@@ -8,6 +8,12 @@
 #include "../debugger.h"
 #include "../engine_instructions.h"
 
+int gi_define_ext_function(Engine_t * engine, const char * function_name, const char * function_entry_point) {
+  Symbol_t symbol;
+  symbol_table_add(engine->symbols, function_name, &symbol);
+  symbol_map_add(engine->values, symbol, (void *)function_entry_point);
+}
+
 int gi_define_function(Engine_t * engine, const char * function_name, const char * function_entry_point) {
   Symbol_t symbol;
   symbol_table_add(engine->symbols, function_name, &symbol);
