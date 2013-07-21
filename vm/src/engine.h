@@ -15,6 +15,10 @@ enum ENGINE_RETURN {
   ENG_RETURN
 };
 
+typedef struct {
+  int value;
+} Expression_t;
+
 int engine_step(Engine_t *, char *);
 
 #endif

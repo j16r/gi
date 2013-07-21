@@ -13,4 +13,7 @@ int gi_required(Engine_t * engine) {
   gi_define_ext_function(engine, "and", &gi_lib_core_logic_and);
   gi_define_ext_function(engine, "or", &gi_lib_core_logic_or);
   gi_define_ext_function(engine, "not", &gi_lib_core_logic_not);
+
+  gi_define_ext_function(engine, "true", &gi_lib_core_logic_true);
+  gi_define_ext_function(engine, "false", &gi_lib_core_logic_false);
 };
