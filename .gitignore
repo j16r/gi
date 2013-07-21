@@ -30,3 +30,4 @@ vm/tests/check_gi
 vm/tests/check_gi.log
 vm/tests/check_gi.trs
 vm/tests/test-suite.log
+*.dSYM
