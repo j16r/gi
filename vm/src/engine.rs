@@ -44,7 +44,7 @@ impl Engine {
   }
 
   pub fn run(&mut self) {
-    for self.instructions.iter().advance |instruction| {
+    for instruction in self.instructions.iter() {
       self.step(self.environment, instruction);
     }
   }

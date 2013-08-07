@@ -10,7 +10,7 @@ impl Loader {
     ~Loader { x: false }
   }
 
-  fn read(self, filename: &str) -> ~[~str] {
+  fn read(&self, filename: &str) -> ~[~str] {
     let read_result: Result<@Reader, ~str>;
     read_result = io::file_reader(~path::Path(filename));
 
@@ -24,9 +24,9 @@ impl Loader {
   }
 
   pub fn load(&mut self, files: &[~str]) {
-    for files.iter().advance |filename| {
+    for filename in files.iter() {
       let lines = self.read(*filename);
-      for lines.iter().advance |line| {
+      for line in lines.iter() {
         io::println(*line);
       }
     }
