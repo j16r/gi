@@ -13,22 +13,18 @@ macro_rules! define_internal_function(
 )
 
 fn append(list: &mut Token, token: &Token) {
-  //let mut ptr = token;
+  let mut ptr = list;
   //loop {
-    //match ptr {
-      //~Empty => break,
-      //_ => ()
-    //}
-    
-    //ptr = rest(ptr);
+    match ptr {
+      //&Empty => break,
+      &Cons(_, ref mut rest) => {
+        *rest = ~Cons(~token.clone(), ~Empty);
+        //ptr = rest;
+      },
+      _ => fail!("Tried to append to non-list object"),
+    }
   //}
 }
-
-//void append (object *list, object *obj) {
-  //object *ptr;
-  //for (ptr = list; cdr(ptr) != NULL; ptr = cdr(ptr));
-  //cdr(ptr) = cons(obj, NULL);
-//}
 
 pub fn name(token: &Token) -> ~str {
   match token {
@@ -159,25 +155,24 @@ impl Environment {
     }
   }
 
-  fn lookup(&self, token: &str) -> ~Token {
-    println(fmt!("Looking up %s", token));
-    match token {
-      "print" => println("Found print function!"),
-      _ => ()
+  fn lookup(&self, token: ~str) -> ~Token {
+    let mut ptr = self.world;
+    loop {
+      match ptr {
+        ~Cons(_, _) => {
+          let item = first(ptr);
+          let nm = first(item);
+          let val = first(rest(item));
+
+          if name(nm) == token {
+            return val;
+          }
+
+          ptr = rest(ptr);
+        },
+        _ => break,
+      }
     }
-    //object *tmp = env;
-
-    //while (tmp != NULL && tmp->type == CONS) {
-    //object *item = car(tmp);
-    //object *nm = car(item);
-    //object *val = car(cdr(item));
-
-    //if(strcmp(name(nm),n) == 0)
-    //return val;
-    //tmp = cdr(tmp);
-    //}
-    //return NULL;
     ~Empty
   }
-
 }
