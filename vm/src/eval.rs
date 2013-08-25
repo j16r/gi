@@ -31,7 +31,7 @@ pub fn eval(token: &Token, env: &Token) -> ~Token {
   }
 }
 
-fn append(list: &mut Token, token: &Token) {
+pub fn append(list: &mut Token, token: &Token) {
   //let mut ptr = token;
   //loop {
     //match ptr {
