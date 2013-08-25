@@ -6,8 +6,12 @@ extern mod std;
 
 #[path = "src"]
 mod vm {
+  mod engine;
   mod instruction;
   mod loader;
-  mod engine;
+  mod parser;
+  mod eval;
+  mod environment;
+
   mod main;
 }
