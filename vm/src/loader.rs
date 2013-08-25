@@ -1,19 +1,18 @@
 use std::io;
 use std::path;
 pub use vm::parser::*;
-pub use vm::eval::*;
 pub use vm::environment::*;
 
 struct Loader {
   parser: ~Parser,
-  environment: ~Token
+  environment: ~Environment
 }
 
 impl Loader {
   pub fn new() -> ~Loader {
     ~Loader{
       parser: Parser::new(),
-      environment: create_environment()}
+      environment: Environment::new()}
   }
 
   fn read(&self, filename: &str) -> ~[~str] {
@@ -33,7 +32,7 @@ impl Loader {
     for filename in files.iter() {
       let lines = self.read(*filename);
       for line in lines.iter() {
-        eval(self.parser.parse(*line), self.environment);
+        self.environment.eval(self.parser.parse(*line));
       }
     }
   }

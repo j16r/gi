@@ -1,6 +1,6 @@
 use std::io;
 use std::os;
-use vm::loader::*;
+use vm::loader::Loader;
 
 fn run(files: &[~str]) {
   let mut loader = Loader::new();

@@ -10,7 +10,6 @@ mod vm {
   mod instruction;
   mod loader;
   mod parser;
-  mod eval;
   mod environment;
 
   mod main;
