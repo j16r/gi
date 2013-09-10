@@ -2,9 +2,9 @@ struct Parser {
   current_expression: ~str
 }
 
-#[deriving(Clone)]
+#[deriving(Clone, Eq)]
 pub enum Token {
-  Empty,
+  Nil,
   Function,
   Lambda(~Token, ~Token),
   Atom(~str),
@@ -18,35 +18,41 @@ impl Parser {
 
   pub fn parse(&mut self, line: &str) -> ~Token {
     self.current_expression = line.to_owned();
-    match self.next_token() {
-      ~Atom(~"(") => {
+    println(fmt!("Parsing line %s", self.current_expression));
+    match *self.next_token() {
+      Atom(~"(") => {
+        println("(");
         self.parse_tail()
       },
-      _ => ~Empty
+      _ => ~Nil
     }
   }
 
   fn parse_tail(&mut self) -> ~Token {
     match self.next_token() {
-      ~Atom(~")") => (),
+      ~Atom(~")") => {
+        println(")");
+        ~Nil
+      },
       ~Atom(~"(") => {
+        println("(");
         let left = self.parse_tail();
         let right = self.parse_tail();
-        return ~Cons(left, right)
+        ~Cons(left, right)
       },
-      ~Atom(text) => {
-        println(fmt!("Token: Atom = %s", text));
-        let left = ~Atom(text);
+      ~Atom(ref text) => {
+        println(fmt!("Token: Atom = %s", *text));
+        let left = ~Atom(text.clone());
         let right = self.parse_tail();
-        return ~Cons(left, right)
+        ~Cons(left, right)
       },
       token => {
+        println("token");
         let left = token;
         let right = self.parse_tail();
-        return ~Cons(left, right)
+        ~Cons(left, right)
       }
     }
-    ~Empty
   }
 
   fn next_token(&mut self) -> ~Token {

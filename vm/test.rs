@@ -53,6 +53,7 @@ fn test_slurp_token() {
   //assert!(slurp_token(&mut it) == ~"TOKEN");
 }
 
+#[deriving(Clone, Eq)]
 struct List {
   next: Option<~List>,
   text: ~str
@@ -64,19 +65,9 @@ impl List {
   }
 
   pub fn append(&mut self, text: ~str) {
-    let mut ptr = self.next;
-    loop {
-      match ptr {
-        ~List => {
-        },
-        None => {
-          ptr.next = ~List{next: None, text: text};
-          break;
-        },
-        _ => {
-          ptr = ptr.next;
-        }
-      }
+    match self.next {
+      Some(ref mut next) => next.append(text),
+      None => self.next = Some(~List{next: None, text: text}),
     }
   }
 }
@@ -84,6 +75,6 @@ impl List {
 #[test]
 fn test_list() {
   let mut list = List::new();
-  list.append("tail");
-  assert!(list == ~List{next: ~List{next: None, text: "tail"}, text: "head"});
+  list.append(~"tail");
+  assert!(list == ~List{next: Some(~List{next: None, text: ~"tail"}), text: ~"head"});
 }

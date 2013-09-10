@@ -10,6 +10,7 @@ struct Loader {
 
 impl Loader {
   pub fn new() -> ~Loader {
+    println("new()");
     ~Loader{
       parser: Parser::new(),
       environment: Environment::new()}
@@ -30,8 +31,10 @@ impl Loader {
 
   pub fn load(&mut self, files: &[~str]) {
     for filename in files.iter() {
+      println(fmt!("loading %s", *filename));
       let lines = self.read(*filename);
       for line in lines.iter() {
+        println("line()");
         self.environment.eval(self.parser.parse(*line));
       }
     }

@@ -8,23 +8,28 @@ struct Environment {
 
 macro_rules! define_internal_function(
   ($name:expr $function:expr) => (
-    ~Cons(~Atom(~$name), ~Cons(~Function, ~Empty));
+    ~Cons(~Atom(~$name), ~Cons(~Function, ~Nil));
   );
 )
 
-fn append(list: &mut Token, token: &Token) {
-  let mut ptr = list;
-  //loop {
-    match ptr {
-      //&Empty => break,
-      &Cons(_, ref mut rest) => {
-        *rest = ~Cons(~token.clone(), ~Empty);
-        //ptr = rest;
-      },
-      _ => fail!("Tried to append to non-list object"),
-    }
-  //}
-}
+fn append(list: &mut Token, token: ~Token) {
+  match *list {
+    Cons(_, ref mut tail @ ~Nil) => 
+      **tail = Cons(token, ~Nil),
+    Cons(_, ref mut rest) => append(*rest, token),
+    _ => fail!("appending() on non list token")
+  }
+} 
+
+#[test]
+fn test_append() {
+  let mut list = ~Cons(~Atom(~"first"), ~Nil);
+
+  append(list, ~Atom(~"second"));
+  dump_token(list);
+  assert!(list == 
+          ~Cons(~Atom(~"first"), ~Cons(~Atom(~"second"), ~Nil)));
+} 
 
 pub fn name(token: &Token) -> ~str {
   match token {
@@ -34,38 +39,38 @@ pub fn name(token: &Token) -> ~str {
 }
 
 fn eval_impl(token: &Token) -> ~Token {
-  dump_token(token);
-  ~Empty
+  ~Nil
 }
 
-fn dump_token(token: &Token) {
+fn dump_token(token: &Token) -> ~str {
   match token {
-    &Empty => println("Empty"),
-    &Function => println("Function"),
-    &Lambda(_, _) => println("Lambda()"),
-    &Atom(ref text) => println(fmt!("Atom(%s)", *text)),
-    &Cons(_, _) => println("Cons()")
+    &Nil => ~"Nil",
+    &Function => ~"Function",
+    &Lambda(_, _) => ~"Lambda()",
+    &Atom(ref text) => fmt!("Atom(%s)", *text),
+    &Cons(ref first, ref rest) => 
+      fmt!("Cons(%s, %s)", dump_token(*first), dump_token(*rest))
   }
 }
 
 pub fn first(token: &Token) -> ~Token {
-  match token {
-    &Cons(ref left, _) => left.clone(),
-    _ => ~Empty
+  match *token {
+    Cons(ref left, _) => left.clone(),
+    _ => ~Nil
   }
 }
 
 pub fn rest(token: &Token) -> ~Token {
-  match token {
-    &Cons(_, ref right) => right.clone(),
-    _ => ~Empty
+  match *token {
+    Cons(_, ref right) => right.clone(),
+    _ => ~Nil
   }
 }
 
 impl Environment {
   pub fn new() -> ~Environment {
     let mut world =
-      ~Cons(define_internal_function!("quote" quote_impl), ~Empty);
+      ~Cons(define_internal_function!("quote" quote_impl), ~Nil);
     append(world, define_internal_function!("first" first_impl));
     append(world, define_internal_function!("rest" rest_impl));
     append(world, define_internal_function!("cons" cons_impl));
@@ -75,9 +80,13 @@ impl Environment {
     append(world, define_internal_function!("lambda" lambda_impl));
     append(world, define_internal_function!("label" label_impl));
 
+    println("world------------------------------");
+    println(dump_token(world));
+    println("world------------------------------");
+
     ~Environment{
       world: world,
-      nil: ~Cons(~Empty, ~Empty),
+      nil: ~Cons(~Nil, ~Nil),
       atom_true: ~Atom(~"#true")
     }
   }
@@ -94,8 +103,8 @@ impl Environment {
     rest(arguments)
   }
 
-  fn cons_impl(&self, arguments: ~Token) -> ~Token {
-    ~Empty
+  fn cons_impl(&self, _: ~Token) -> ~Token {
+    ~Nil
   }
 
   fn equal_impl(&self, arguments: ~Token) -> ~Token {
@@ -108,38 +117,38 @@ impl Environment {
     }
   }
 
-  fn atom_impl(&self, arguments: ~Token) -> ~Token {
-    ~Empty
+  fn atom_impl(&self, _: ~Token) -> ~Token {
+    ~Nil
   }
 
-  fn cond_impl(&self, arguments: ~Token) -> ~Token {
-    ~Empty
+  fn cond_impl(&self, _: ~Token) -> ~Token {
+    ~Nil
   }
 
-  fn lambda_impl(&self, arguments: ~Token) -> ~Token {
-    ~Empty
+  fn lambda_impl(&self, _: ~Token) -> ~Token {
+    ~Nil
   }
 
-  fn label_impl(&self, arguments: ~Token) -> ~Token {
-    ~Empty
+  fn label_impl(&self, _: ~Token) -> ~Token {
+    ~Nil
   }
 
   pub fn eval(&mut self, token: &Token) -> ~Token {
-    match token {
-      &Cons(ref left, ref right) => {
-        match left {
-          &~Atom(~"lambda") => {
+    match *token {
+      Cons(ref left, _) => {
+        match *left {
+          ~Atom(~"lambda") => {
             let largs = first(rest(token));
             let lsexp = first(rest(rest(token)));
             ~Lambda(largs, lsexp)
           },
           _ => {
-            let mut accum = ~Cons(self.eval(first(token)), ~Empty);
+            let mut accum = ~Cons(self.eval(first(token)), ~Nil);
             let mut sexp = rest(token);
 
             loop {
-              match sexp {
-                ~Cons(_, _) => {
+              match *sexp {
+                Cons(_, _) => {
                   append(accum, self.eval(first(sexp)));
                   sexp = rest(sexp);
                 },
@@ -156,23 +165,20 @@ impl Environment {
   }
 
   fn lookup(&self, token: ~str) -> ~Token {
-    let mut ptr = self.world;
-    loop {
-      match ptr {
-        ~Cons(_, _) => {
-          let item = first(ptr);
-          let nm = first(item);
-          let val = first(rest(item));
+    lookup_tail(self.world, token)
+  }
+}
 
-          if name(nm) == token {
-            return val;
-          }
-
-          ptr = rest(ptr);
-        },
-        _ => break,
+fn lookup_tail(cursor: &Token, token: ~str) -> ~Token {
+  match *cursor {
+    Cons(ref item, ref tail) => {
+      //println("Lookup tail Cons");
+      if name(first(*item)) == token {
+        first(*tail)
+      } else {
+        lookup_tail(*tail, token)
       }
-    }
-    ~Empty
+    },
+    _ => ~Nil
   }
 }
