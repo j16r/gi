@@ -1,14 +1,21 @@
-use vm::parser::*;
-
 struct Environment {
   world: @mut Token,
   nil: @mut Token,
   atom_true: @mut Token
 }
 
+pub enum Token {
+  Nil,
+  Function(extern "Rust" fn(&Environment, @mut Token) -> @mut Token),
+  Lambda(@mut Token, @mut Token),
+  Atom(~str),
+  Cons(@mut Token, @mut Token)
+}
+
 macro_rules! define_internal_function(
   ($name:expr $function:ident) => (
-    @mut Cons(@mut Atom(~$name), @mut Cons(@mut Function, @mut Nil));
+    @mut Cons(@mut Atom(~$name),
+              @mut Cons(@mut Function($function), @mut Nil));
   );
 )
 
@@ -45,7 +52,7 @@ fn eval_impl(token: &Token) -> @mut Token {
 fn dump_token(token: &Token) -> ~str {
   match *token {
     Nil => ~"Nil",
-    Function() => ~"Function",
+    Function(_) => ~"Function",
     Lambda(_, _) => ~"Lambda()",
     Atom(ref text) => fmt!("Atom(%s)", *text),
     Cons(ref first, ref rest) =>

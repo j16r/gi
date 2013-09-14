@@ -1,13 +1,7 @@
+use vm::environment::*;
+
 struct Parser {
   current_expression: ~str
-}
-
-pub enum Token {
-  Nil,
-  Function,
-  Lambda(@mut Token, @mut Token),
-  Atom(~str),
-  Cons(@mut Token, @mut Token)
 }
 
 impl Parser {
