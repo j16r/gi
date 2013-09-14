@@ -2,13 +2,12 @@ struct Parser {
   current_expression: ~str
 }
 
-#[deriving(Clone, Eq)]
 pub enum Token {
   Nil,
   Function,
-  Lambda(~Token, ~Token),
+  Lambda(@mut Token, @mut Token),
   Atom(~str),
-  Cons(~Token, ~Token)
+  Cons(@mut Token, @mut Token)
 }
 
 impl Parser {
@@ -16,7 +15,7 @@ impl Parser {
     ~Parser{current_expression: ~""}
   }
 
-  pub fn parse(&mut self, line: &str) -> ~Token {
+  pub fn parse(&mut self, line: &str) -> @mut Token {
     self.current_expression = line.to_owned();
     println(fmt!("Parsing line %s", self.current_expression));
     match *self.next_token() {
@@ -24,38 +23,39 @@ impl Parser {
         println("(");
         self.parse_tail()
       },
-      _ => ~Nil
+      _ => @mut Nil
     }
   }
 
-  fn parse_tail(&mut self) -> ~Token {
-    match self.next_token() {
-      ~Atom(~")") => {
+  fn parse_tail(&mut self) -> @mut Token {
+    let token = self.next_token();
+    match *token {
+      Atom(~")") => {
         println(")");
-        ~Nil
+        @mut Nil
       },
-      ~Atom(~"(") => {
+      Atom(~"(") => {
         println("(");
         let left = self.parse_tail();
         let right = self.parse_tail();
-        ~Cons(left, right)
+        @mut Cons(left, right)
       },
-      ~Atom(ref text) => {
+      Atom(ref text) => {
         println(fmt!("Token: Atom = %s", *text));
-        let left = ~Atom(text.clone());
+        let left = @mut Atom(text.clone());
         let right = self.parse_tail();
-        ~Cons(left, right)
+        @mut Cons(left, right)
       },
-      token => {
+      _ => {
         println("token");
         let left = token;
         let right = self.parse_tail();
-        ~Cons(left, right)
+        @mut Cons(left, right)
       }
     }
   }
 
-  fn next_token(&mut self) -> ~Token {
+  fn next_token(&mut self) -> @mut Token {
     let mut ch = self.current_expression.shift_char();
 
     while(ch.is_whitespace()) {
@@ -67,10 +67,10 @@ impl Parser {
     }
 
     if(ch == ')') {
-      return ~Atom(~")");
+      return @mut Atom(~")");
     }
     if(ch == '(') {
-      return ~Atom(~"(");
+      return @mut Atom(~"(");
     }
 
     let mut token = ~"";
@@ -83,6 +83,6 @@ impl Parser {
       self.current_expression.unshift_char(ch);
     }
 
-    ~Atom(token)
+    @mut Atom(token)
   }
 }
