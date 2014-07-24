@@ -1,41 +1,34 @@
-use std::io;
-use std::path;
-pub use vm::parser::*;
-pub use vm::environment::*;
+use std::io::File;
+use std::path::{Path};
+use vm::parser::parse;
+use vm::environment::{Environment, dump_token};
 
-struct Loader {
-  parser: ~Parser,
-  environment: ~Environment
+pub struct Loader {
+  environment: Box<Environment>
 }
 
 impl Loader {
-  pub fn new() -> ~Loader {
-    println("new()");
-    ~Loader{
-      parser: Parser::new(),
+  pub fn new() -> Box<Loader> {
+    box Loader {
       environment: Environment::new()}
   }
 
-  fn read(&self, filename: &str) -> ~[~str] {
-    let read_result: Result<@Reader, ~str>;
-    read_result = io::file_reader(~path::Path(filename));
-
-    if read_result.is_ok() {
-      let file = read_result.unwrap();
-      return file.read_lines();
-    }
-
-    println(fmt!("Error reading file: %?", read_result.unwrap_err()));
-    return ~[];
-  }
-
-  pub fn load(&mut self, files: &[~str]) {
+  pub fn load(&mut self, files: &[String]) {
     for filename in files.iter() {
-      println(fmt!("loading %s", *filename));
-      let lines = self.read(*filename);
-      for line in lines.iter() {
-        println("line()");
-        self.environment.eval(self.parser.parse(*line));
+      println!("loading {:s}", filename.as_slice());
+
+      let path = Path::new(filename.as_slice());
+      let mut file = File::open(&path).unwrap();
+      let contents_result = file.read_to_string();
+
+      match contents_result {
+        Ok(contents) => {
+          let ast = parse(contents);
+          let env = self.environment.eval(&ast);
+          let root_token = dump_token(env);
+          println!(">\n{:s}", root_token.as_slice());
+        },
+        Err(_) => fail!("Error opening file")
       }
     }
   }

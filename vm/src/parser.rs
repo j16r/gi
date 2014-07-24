@@ -1,82 +1,94 @@
-use vm::environment::*;
+use vm::environment::{Token, Nil, Function, Lambda, Atom, OpenParen, CloseParen, Cons};
 
 struct Parser {
-  current_expression: ~str
+  input: String,
+  position: uint,
+  length: uint
+}
+
+pub fn parse(program: String) -> Box<Token> {
+  let mut parser = Parser {
+    input: program.to_string(),
+    position: 0,
+    length: program.len()
+  };
+
+  println!("Parsing {}", program);
+
+  match *parser.next_token() {
+    OpenParen => {
+      println!("(");
+      parser.parse_tail()
+    },
+    _ => box Nil
+  }
 }
 
 impl Parser {
-  pub fn new() -> ~Parser {
-    ~Parser{current_expression: ~""}
-  }
 
-  pub fn parse(&mut self, line: &str) -> @mut Token {
-    self.current_expression = line.to_owned();
-    println(fmt!("Parsing line %s", self.current_expression));
-    match *self.next_token() {
-      Atom(~"(") => {
-        println("(");
-        self.parse_tail()
-      },
-      _ => @mut Nil
-    }
-  }
-
-  fn parse_tail(&mut self) -> @mut Token {
+  fn parse_tail(&mut self) -> Box<Token> {
     let token = self.next_token();
     match *token {
-      Atom(~")") => {
-        println(")");
-        @mut Nil
+      CloseParen => {
+        println!(")");
+        box Nil
       },
-      Atom(~"(") => {
-        println("(");
+      OpenParen => {
+        println!("(");
         let left = self.parse_tail();
         let right = self.parse_tail();
-        @mut Cons(left, right)
+        box Cons(left, right)
       },
       Atom(ref text) => {
-        println(fmt!("Token: Atom = %s", *text));
-        let left = @mut Atom(text.clone());
+        println!("Token: Atom = {:s}", text.as_slice());
+        let left = box Atom(text.to_string());
         let right = self.parse_tail();
-        @mut Cons(left, right)
+        box Cons(left, right)
       },
       _ => {
-        println("token");
+        println!("token");
         let left = token;
         let right = self.parse_tail();
-        @mut Cons(left, right)
+        box Cons(left, right)
       }
     }
   }
 
-  fn next_token(&mut self) -> @mut Token {
-    let mut ch = self.current_expression.shift_char();
+  fn current_char(&self) -> char {
+    self.input.as_slice().char_at(self.position)
+  }
 
-    while(ch.is_whitespace()) {
-      ch = self.current_expression.shift_char();
-    }
+  fn consume_char(&mut self) {
+    self.position += 1;
+  }
 
-    if(ch == '\n') {
-      self.current_expression.shift_char();
+  fn next_token(&mut self) -> Box<Token> {
+    let mut ch = self.current_char();
+    self.consume_char();
+
+    while(ch.is_whitespace() || ch == '\n') {
+      self.consume_char();
+      ch = self.current_char();
     }
 
     if(ch == ')') {
-      return @mut Atom(~")");
+      return box CloseParen;
     }
     if(ch == '(') {
-      return @mut Atom(~"(");
+      return box OpenParen;
     }
 
-    let mut token = ~"";
+    let mut token = "".to_string();
     while(!ch.is_whitespace() && ch != ')') {
+      self.consume_char();
       token.push_char(ch);
-      ch = self.current_expression.shift_char();
+      ch = self.current_char();
     }
 
-    if(ch == ')') {
-      self.current_expression.unshift_char(ch);
-    }
+    //if(ch == ')') { self.consume_char(ch);
+      //self.current_expression.unshift_char(ch);
+    //}
 
-    @mut Atom(token)
+    box Atom(token)
   }
 }

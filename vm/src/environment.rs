@@ -1,191 +1,266 @@
-struct Environment {
-  world: @mut Token,
-  nil: @mut Token,
-  atom_true: @mut Token
+use std::mem::swap;
+use std::str::{MaybeOwned, Slice, Owned};
+
+static ATOM_NIL : Token = Nil;
+//static ATOM_TRUE : Token = Atom("#true".to_string());
+//static ATOM_FALSE : Token = Atom("#false".to_string());
+
+pub struct Environment {
+  world: Box<Token>,
 }
 
 pub enum Token {
   Nil,
-  Function(extern "Rust" fn(&Environment, @mut Token) -> @mut Token),
-  Lambda(@mut Token, @mut Token),
-  Atom(~str),
-  Cons(@mut Token, @mut Token)
+  True,
+  False,
+  OpenParen,
+  CloseParen,
+  Atom(String),
+  Function(extern "Rust" fn(&Environment, &Token) -> Box<Token>),
+  Lambda(Box<Token>, Box<Token>),
+  Cons(Box<Token>, Box<Token>)
 }
 
 macro_rules! define_internal_function(
   ($name:expr $function:ident) => (
-    @mut Cons(@mut Atom(~$name),
-              @mut Cons(@mut Function($function), @mut Nil));
+    box Cons(box Atom(box $name),
+             box Cons(box Function($function), box Nil));
   );
 )
 
-fn append(list: @mut Token, token: @mut Token) {
+fn append(list: &mut Box<Token>, token: Box<Token>) {
   match *list {
-    Cons(_, ref mut tail @ @Nil) =>
-      **tail = Cons(token, @mut Nil),
-    Cons(_, ref mut rest) => append(*rest, token),
+    box Cons(_, ref mut tail @ box Nil) => {
+      swap(tail, &mut box Cons(token, box Nil))
+    }
+    box Cons(_, ref mut rest) => {
+      append(rest, token)
+    },
     _ => fail!("appending() on non list token")
   }
 }
 
 #[test]
 fn test_append() {
-  let mut list = @Cons(@Atom(~"first"), @mut Nil);
+  let mut list = box Cons(box Atom(box "first"), box Nil);
 
-  append(list, @Atom(~"second"));
+  append(list, box Atom(box "second"));
   dump_token(list);
   assert!(list ==
-          @Cons(@Atom(~"first"), @Cons(@Atom(~"second"), @mut Nil)));
+          box Cons(box Atom(box "first"),
+                    box Cons(box Atom(box "second"), box Nil)));
 }
 
-pub fn name(token: &Token) -> ~str {
+pub fn name(token: &Box<Token>) -> String {
   match *token {
-    Atom(ref name) => name.clone(),
-    _ => fail!("Applied name function to non Atom object"),
+    box Atom(ref name) => name.clone(),
+    _ => fail!(format!("Applied name function to non Atom object {}", dump_token(token))),
   }
 }
 
-fn eval_impl(token: &Token) -> @mut Token {
-  @mut Nil
+fn eval_impl<'r>(env: &Environment, token: &'r Box<Token>) -> &'r Box<Token> {
+  println!("eval_impl");
+  let symbol = first(token);
+  //let args = rest(token);
+
+  match *symbol {
+    //Lambda(_, _) => *env.atom_nil,
+    //Function(function) => function(env, token),
+    _ => token,
+  }
 }
 
-fn dump_token(token: &Token) -> ~str {
+pub fn dump_token<'a>(token: &Box<Token>) -> MaybeOwned<'a> {
   match *token {
-    Nil => ~"Nil",
-    Function(_) => ~"Function",
-    Lambda(_, _) => ~"Lambda()",
-    Atom(ref text) => fmt!("Atom(%s)", *text),
-    Cons(ref first, ref rest) =>
-      fmt!("Cons(%s, %s)", dump_token(*first), dump_token(*rest))
+    box Nil =>
+      Slice("Nil"),
+    box Function(_) =>
+      Slice("Function"),
+    box Lambda(_, _) =>
+      Slice("Lambda()"),
+    box Atom(ref text) =>
+      Owned(format!("Atom({})", *text)),
+    box OpenParen =>
+      Slice("("),
+    box CloseParen =>
+      Slice(")"),
+    box Cons(ref first, ref rest) =>
+      Owned(format!("Cons({}, {})", dump_token(first), dump_token(rest))),
+    _ => fail!("U R LAZY!")
   }
 }
 
-pub fn first(token: @mut Token) -> @mut Token {
+pub fn first(token: &Box<Token>) -> &Box<Token> {
   match *token {
-    Cons(ref left, _) => *left,
-    _ => @mut Nil
+    box Cons(ref first, _) => first,
+    _ => &box ATOM_NIL
   }
 }
 
-pub fn rest(token: @mut Token) -> @mut Token {
+pub fn rest(token: &Box<Token>) -> &Box<Token> {
   match *token {
-    Cons(_, ref right) => *right,
-    _ => @mut Nil
+    box Cons(_, ref rest) => rest,
+    _ => &box ATOM_NIL
   }
 }
 
-fn quote_impl(env: &Environment, arguments: @mut Token) -> @mut Token {
-  first(arguments)
+pub fn next(token: &Box<Token>) -> &Box<Token> {
+  first(rest(token))
 }
 
-fn first_impl(env: &Environment, arguments: @mut Token) -> @mut Token {
-  first(arguments)
-}
+//fn quote_impl(env: &Environment, arguments: Box<Token>) -> Box<Token> {
+  //println("quote_impl");
+  //first(arguments)
+//}
 
-fn rest_impl(env: &Environment, arguments: @mut Token) -> @mut Token {
-  rest(arguments)
-}
+//fn first_impl(env: &Environment, arguments: Box<Token>) -> Box<Token> {
+  //println("first_impl");
+  //first(first(arguments))
+//}
 
-fn cons_impl(env: &Environment, _: @mut Token) -> @mut Token {
-  @mut Nil
-}
+//fn rest_impl(env: &Environment, arguments: Box<Token>) -> Box<Token> {
+  //println("rest_impl");
+  //rest(first(arguments))
+//}
 
-fn equal_impl(env: &Environment, arguments: @mut Token) -> @mut Token {
-  let left = first(arguments);
-  let right = rest(arguments);
-  if name(left) == name(right) {
-    env.atom_true
-  } else {
-    env.nil
-  }
-}
+//fn cons_impl(env: &Environment, arguments: Box<Token>) -> Box<Token> {
+  //println("cons_impl");
+  //let list = Box<Cons>(first(arguments), Box<Nil>);
+  //let mut args = first(rest(arguments));
 
-fn atom_impl(env: &Environment, _: @mut Token) -> @mut Token {
-  @mut Nil
-}
+  //loop {
+    //match *args {
+      //Cons(_, _) => {
+        //append(list, first(args));
+        //args = rest(args);
+      //},
+      //_ => break
+    //}
+  //}
 
-fn cond_impl(env: &Environment, _: @mut Token) -> @mut Token {
-  @mut Nil
-}
+  //list
 
-fn lambda_impl(env: &Environment, _: @mut Token) -> @mut Token {
-  @mut Nil
-}
+  ////object *list = cons(car(args),NULL);
+  ////args = car(cdr(args));
 
-fn label_impl(env: &Environment, _: @mut Token) -> @mut Token {
-  @mut Nil
-}
+  ////while (args != NULL && args->type == CONS){
+    ////append(list,car(args));
+    ////args = cdr(args);
+  ////}
+
+  ////return list;
+//}
+
+//fn equal_impl(env: &Environment, arguments: Box<Token>) -> Box<Token> {
+  //println("equal_impl");
+  //let left = first(arguments);
+  //let right = rest(arguments);
+  //if name(left) == name(right) {
+    //env.atom_true
+  //} else {
+    //env.nil
+  //}
+//}
+
+//fn atom_impl(env: &Environment, _: Box<Token>) -> Box<Token> {
+  //println("atom_impl");
+  //Box<Nil>
+//}
+
+//fn cond_impl(env: &Environment, _: Box<Token>) -> Box<Token> {
+  //println("cond_impl");
+  //Box<Nil>
+//}
+
+//fn lambda_impl(env: &Environment, _: Box<Token>) -> Box<Token> {
+  //println("lambda_impl");
+  //Box<Nil>
+//}
+
+//fn label_impl(env: &Environment, _: Box<Token>) -> Box<Token> {
+  //println("label_impl");
+  //Box<Nil>
+//}
 
 impl Environment {
-  pub fn new() -> ~Environment {
-    let mut world =
-      @mut Cons(define_internal_function!("quote" quote_impl), @mut Nil);
-    append(world, define_internal_function!("first" first_impl));
-    append(world, define_internal_function!("rest" rest_impl));
-    append(world, define_internal_function!("cons" cons_impl));
-    append(world, define_internal_function!("equal" equal_impl));
-    append(world, define_internal_function!("atom" atom_impl));
-    append(world, define_internal_function!("cond" cond_impl));
-    append(world, define_internal_function!("lambda" lambda_impl));
-    append(world, define_internal_function!("label" label_impl));
+  pub fn new() -> Box<Environment> {
+    //let mut world =
+      //Box<Cons>(define_internal_function!("quote" quote_impl), Box<Nil>);
+    //append(world, define_internal_function!("first" first_impl));
+    //append(world, define_internal_function!("rest" rest_impl));
+    //append(world, define_internal_function!("cons" cons_impl));
+    //append(world, define_internal_function!("equal" equal_impl));
+    //append(world, define_internal_function!("atom" atom_impl));
+    //append(world, define_internal_function!("cond" cond_impl));
+    //append(world, define_internal_function!("lambda" lambda_impl));
+    //append(world, define_internal_function!("label" label_impl));
 
-    println("world------------------------------");
-    println(dump_token(world));
-    println("world------------------------------");
+    //println("world------------------------------");
+    //println(dump_token(world));
+    //println("world------------------------------");
 
-    ~Environment{
-      world: world,
-      nil: @mut Cons(@mut Nil, @mut Nil),
-      atom_true: @mut Atom(~"#true")
+    box Environment {
+      world: box Cons(box Nil, box Nil),
     }
   }
 
-  pub fn eval(&mut self, token: @mut Token) -> @mut Token {
+  pub fn eval(&mut self, token: &Box<Token>) -> Box<Token> {
     match *token {
-      Cons(ref left, _) => {
-        match *left {
-          @Atom(~"lambda") => {
+      box Cons(left, _) => {
+        match left {
+          box Atom(ref desc) if *desc == "lambda".to_string() => {
             let largs = first(rest(token));
             let lsexp = first(rest(rest(token)));
-            @mut Lambda(largs, lsexp)
+            box Lambda(*largs, *lsexp)
           },
-          _ => {
-            let mut accum = @mut Cons(self.eval(first(token)), @mut Nil);
-            let mut sexp = rest(token);
+          _ => fail!("Uh oh!")
+            //let mut accum = box Cons(self.eval(box *first(token)), box Nil);
+            //let mut sexp = rest(token);
 
-            loop {
-              match *sexp {
-                Cons(_, _) => {
-                  append(accum, self.eval(first(sexp)));
-                  sexp = rest(sexp);
-                },
-                _ => break,
-              }
-            }
+            //loop {
+              //match *sexp {
+                //Cons(_, _) => {
+                  //append(accum, self.eval(box *first(sexp)));
+                  //sexp = rest(sexp);
+                //},
+                //_ => break,
+              //}
+            //}
 
-            eval_impl(accum)
-          },
+            //eval_impl(self, accum)
+          //},
         }
       },
-      _ => self.lookup(name(token)),
+      _ => self.lookup(name(token)).clone(),
     }
   }
 
-  fn lookup(&self, token: ~str) -> @mut Token {
-    lookup_tail(self.world, token)
+  fn lookup(&self, token: String) -> &Box<Token> {
+    lookup_tail(&self.world, token)
   }
 }
 
-fn lookup_tail(cursor: &Token, token: ~str) -> @mut Token {
+fn lookup_tail(cursor: &Box<Token>, token: String) -> &Box<Token> {
   match *cursor {
-    Cons(ref item, ref tail) => {
-      //println("Lookup tail Cons");
-      if name(first(*item)) == token {
-        first(*tail)
+    box Cons(ref item, ref tail) => {
+      if name(first(item)) == token {
+        first(tail)
       } else {
-        lookup_tail(*tail, token)
+        lookup_tail(tail, token)
       }
     },
-    _ => @mut Nil
+    _ => &box ATOM_NIL
   }
+}
+
+#[test]
+fn test_lookup_tail() {
+  let list = box Cons(
+    box Cons(box Nil, box Nil),
+    box Cons(
+      box Cons(
+        box Cons(box Atom("needle".to_string()), box Atom("prize".to_string())),
+        box Cons(box Cons(box Atom("haystack".to_string()), box Nil), box Nil))));
+
+  assert!(lookup_tail(list, "needle".to_string()) == box Atom("prize".to_string()))
 }

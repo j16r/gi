@@ -1,8 +1,9 @@
-#[ desc = "gi-lang" ];
-#[ license = "MIT" ];
-#[ author = "John Barker" ];
+#![ desc = "gi-lang" ]
+#![ license = "MIT" ]
+#![ author = "John Barker" ]
+#![feature(macro_rules)]
 
-extern mod std;
+extern crate std;
 
 #[path = "src"]
 mod vm {

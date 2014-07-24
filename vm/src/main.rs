@@ -2,7 +2,7 @@ use std::io;
 use std::os;
 use vm::loader::Loader;
 
-fn run(files: &[~str]) {
+fn run(files: &[String]) {
   let mut loader = Loader::new();
   loader.load(files)
 }
@@ -21,9 +21,9 @@ fn main() {
   if (os_args.len() < 2) {
     print_usage()
   } else {
-    match os_args[1] {
-      ~"run" => run(os_args.slice(2, os_args.len())),
-      _      => print_usage(),
+    match os_args.get(1).as_slice() {
+      "run" => run(os_args.slice(2, os_args.len())),
+      _     => print_usage(),
     }
   }
 }
