@@ -34,7 +34,7 @@ fn test_skip() {
   skip(&mut it);
 
   //let fixed_text = it.to_owned();
-  //println(fmt!("After skip %s", fixed_text));
+  //println(format!("After skip {}", fixed_text));
   assert!(it.to_owned_vec() == ~['t', 'r', 'i', 'm']);
 }
 
@@ -47,9 +47,9 @@ fn test_slurp_token() {
   let text = ~"token TOKEN";
   let mut it = text.iter();
 
-  println(fmt!("Token: %s", slurp_token(&mut it)));
+  println(format!("Token: {}", slurp_token(&mut it)));
   //assert!(slurp_token(&mut it) == ~"token");
-  println(fmt!("Token: %s", slurp_token(&mut it)));
+  println(format!("Token: {}", slurp_token(&mut it)));
   //assert!(slurp_token(&mut it) == ~"TOKEN");
 }
 
@@ -77,4 +77,17 @@ fn test_list() {
   let mut list = List::new();
   list.append(~"tail");
   assert!(list == ~List{next: Some(~List{next: None, text: ~"tail"}), text: ~"head"});
+}
+
+enum FuncHolder {
+  Func(fn()),
+  Nil,
+}
+
+pub fn do_something() {
+}
+
+#[test]
+fn test_func_holder() {
+  let fn_tuple = Func(do_something);
 }

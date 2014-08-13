@@ -92,3 +92,7 @@ impl Parser {
     box Atom(token)
   }
 }
+
+#[test]
+fn test_parser() {
+}

@@ -1,10 +1,6 @@
 use std::mem::swap;
 use std::str::{MaybeOwned, Slice, Owned};
 
-static ATOM_NIL : Token = Nil;
-//static ATOM_TRUE : Token = Atom("#true".to_string());
-//static ATOM_FALSE : Token = Atom("#false".to_string());
-
 pub struct Environment {
   world: Box<Token>,
 }
@@ -93,14 +89,14 @@ pub fn dump_token<'a>(token: &Box<Token>) -> MaybeOwned<'a> {
 pub fn first(token: &Box<Token>) -> &Box<Token> {
   match *token {
     box Cons(ref first, _) => first,
-    _ => &box ATOM_NIL
+    _ => box Nil
   }
 }
 
 pub fn rest(token: &Box<Token>) -> &Box<Token> {
   match *token {
     box Cons(_, ref rest) => rest,
-    _ => &box ATOM_NIL
+    _ => &box Nil
   }
 }
 
@@ -205,34 +201,35 @@ impl Environment {
   }
 
   pub fn eval(&mut self, token: &Box<Token>) -> Box<Token> {
-    match *token {
-      box Cons(left, _) => {
-        match left {
-          box Atom(ref desc) if *desc == "lambda".to_string() => {
-            let largs = first(rest(token));
-            let lsexp = first(rest(rest(token)));
-            box Lambda(*largs, *lsexp)
-          },
-          _ => fail!("Uh oh!")
-            //let mut accum = box Cons(self.eval(box *first(token)), box Nil);
-            //let mut sexp = rest(token);
-
-            //loop {
-              //match *sexp {
-                //Cons(_, _) => {
-                  //append(accum, self.eval(box *first(sexp)));
-                  //sexp = rest(sexp);
-                //},
-                //_ => break,
-              //}
-            //}
-
-            //eval_impl(self, accum)
+    box Atom("Hello".to_owned())
+    //match *token {
+      //box Cons(left, _) => {
+        //match left {
+          //box Atom(ref desc) if *desc == "lambda".to_string() => {
+            //let largs = first(rest(token));
+            //let lsexp = first(rest(rest(token)));
+            //box Lambda(*largs, *lsexp)
           //},
-        }
-      },
-      _ => self.lookup(name(token)).clone(),
-    }
+          //_ => fail!("Uh oh!")
+            ////let mut accum = box Cons(self.eval(box *first(token)), box Nil);
+            ////let mut sexp = rest(token);
+
+            ////loop {
+              ////match *sexp {
+                ////Cons(_, _) => {
+                  ////append(accum, self.eval(box *first(sexp)));
+                  ////sexp = rest(sexp);
+                ////},
+                ////_ => break,
+              ////}
+            ////}
+
+            ////eval_impl(self, accum)
+          ////},
+        //}
+      //},
+      //_ => self.lookup(name(token)).clone(),
+    //}
   }
 
   fn lookup(&self, token: String) -> &Box<Token> {
@@ -249,7 +246,7 @@ fn lookup_tail(cursor: &Box<Token>, token: String) -> &Box<Token> {
         lookup_tail(tail, token)
       }
     },
-    _ => &box ATOM_NIL
+    _ => &box Nil
   }
 }
 

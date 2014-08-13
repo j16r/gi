@@ -25,7 +25,7 @@ impl Loader {
         Ok(contents) => {
           let ast = parse(contents);
           let env = self.environment.eval(&ast);
-          let root_token = dump_token(env);
+          let root_token = dump_token(&env);
           println!(">\n{:s}", root_token.as_slice());
         },
         Err(_) => fail!("Error opening file")
