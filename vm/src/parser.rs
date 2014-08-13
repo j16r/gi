@@ -1,4 +1,5 @@
-use vm::environment::{Token, Nil, Function, Lambda, Atom, OpenParen, CloseParen, Cons};
+use vm::ast::{Token, Nil, Atom, OpenParen, CloseParen, Cons};
+use std::fmt;
 
 struct Parser {
   input: String,
@@ -6,7 +7,20 @@ struct Parser {
   length: uint
 }
 
-pub fn parse(program: String) -> Box<Token> {
+pub struct ParseError {
+  line_number: uint,
+  character: uint
+}
+
+impl fmt::Show for ParseError {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{}:{}", self.line_number, self.character)
+  }
+}
+
+type ParserResult = Result<Box<Token>, ParseError>;
+
+pub fn parse(program: String) -> ParserResult {
   let mut parser = Parser {
     input: program.to_string(),
     position: 0,
@@ -15,41 +29,48 @@ pub fn parse(program: String) -> Box<Token> {
 
   println!("Parsing {}", program);
 
-  match *parser.next_token() {
+  match *try!(parser.next_token()) {
     OpenParen => {
       println!("(");
       parser.parse_tail()
     },
-    _ => box Nil
+    _ => Ok(box Nil)
+  }
+}
+
+pub fn dump(ast : Box<Token>) -> String {
+  match *ast {
+    OpenParen => "(".to_string(),
+    CloseParen => ")".to_string(),
+    _ => "".to_string()
   }
 }
 
 impl Parser {
-
-  fn parse_tail(&mut self) -> Box<Token> {
-    let token = self.next_token();
+  fn parse_tail(&mut self) -> ParserResult {
+    let token = try!(self.next_token());
     match *token {
       CloseParen => {
         println!(")");
-        box Nil
+        Ok(box Nil)
       },
       OpenParen => {
         println!("(");
-        let left = self.parse_tail();
-        let right = self.parse_tail();
-        box Cons(left, right)
+        let left = try!(self.parse_tail());
+        let right = try!(self.parse_tail());
+        Ok(box Cons(left, right))
       },
       Atom(ref text) => {
         println!("Token: Atom = {:s}", text.as_slice());
         let left = box Atom(text.to_string());
-        let right = self.parse_tail();
-        box Cons(left, right)
+        let right = try!(self.parse_tail());
+        Ok(box Cons(left, right))
       },
       _ => {
         println!("token");
         let left = token;
-        let right = self.parse_tail();
-        box Cons(left, right)
+        let right = try!(self.parse_tail());
+        Ok(box Cons(left, right))
       }
     }
   }
@@ -62,7 +83,7 @@ impl Parser {
     self.position += 1;
   }
 
-  fn next_token(&mut self) -> Box<Token> {
+  fn next_token(&mut self) -> ParserResult {
     let mut ch = self.current_char();
     self.consume_char();
 
@@ -72,10 +93,10 @@ impl Parser {
     }
 
     if(ch == ')') {
-      return box CloseParen;
+      return Ok(box CloseParen);
     }
     if(ch == '(') {
-      return box OpenParen;
+      return Ok(box OpenParen);
     }
 
     let mut token = "".to_string();
@@ -89,10 +110,22 @@ impl Parser {
       //self.current_expression.unshift_char(ch);
     //}
 
-    box Atom(token)
+    Ok(box Atom(token))
   }
 }
 
+fn assert_parse_tree(input : &str, output : &str) {
+  let ast = parse(input.to_string());
+  let formatted = dump(ast.unwrap());
+  assert_eq!(formatted, output.to_string());
+}
+
 #[test]
-fn test_parser() {
+fn test_parse_empty_program() {
+  assert_parse_tree("", "");
+}
+
+#[test]
+fn test_parse_empty_list() {
+  assert_parse_tree("()", "()");
 }

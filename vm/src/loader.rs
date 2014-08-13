@@ -1,7 +1,7 @@
 use std::io::File;
 use std::path::{Path};
-use vm::parser::parse;
-use vm::environment::{Environment, dump_token};
+use vm::parser::{parse, ParseError};
+use vm::environment::{Environment};
 
 pub struct Loader {
   environment: Box<Environment>
@@ -19,16 +19,11 @@ impl Loader {
 
       let path = Path::new(filename.as_slice());
       let mut file = File::open(&path).unwrap();
-      let contents_result = file.read_to_string();
+      let contents = file.read_to_string();
 
-      match contents_result {
-        Ok(contents) => {
-          let ast = parse(contents);
-          let env = self.environment.eval(&ast);
-          let root_token = dump_token(&env);
-          println!(">\n{:s}", root_token.as_slice());
-        },
-        Err(_) => fail!("Error opening file")
+      match parse(contents.unwrap()) {
+        Ok(ast) => { self.environment.eval(&ast); },
+        Err(_) => fail!("Parsing error")
       }
     }
   }

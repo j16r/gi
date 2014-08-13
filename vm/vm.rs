@@ -10,6 +10,7 @@ mod vm {
   mod loader;
   mod parser;
   mod environment;
+  mod ast;
 
   mod main;
 }
