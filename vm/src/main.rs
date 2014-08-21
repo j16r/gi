@@ -18,7 +18,7 @@ fn print_usage() {
 fn main() {
   let os_args = os::args();
 
-  if (os_args.len() < 2) {
+  if os_args.len() < 2 {
     print_usage()
   } else {
     match os_args.get(1).as_slice() {

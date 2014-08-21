@@ -97,7 +97,7 @@ impl Parser {
   }
 
   fn next_token(&mut self) -> ParserResult {
-    if(self.eof()) {
+    if self.eof() {
       return Ok(box Nil);
     }
 
@@ -108,10 +108,10 @@ impl Parser {
       self.advance_char();
     }
 
-    if(ch == ')') {
+    if ch == ')' {
       return Ok(box CloseParen);
     }
-    if(ch == '(') {
+    if ch == '(' {
       return Ok(box OpenParen);
     }
 
@@ -122,7 +122,7 @@ impl Parser {
       self.advance_char();
     }
 
-    if(ch == ')') {
+    if ch == ')' {
       self.rewind_char();
     }
 

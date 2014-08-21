@@ -1,5 +1,3 @@
-use std::mem::swap;
-use std::str::{MaybeOwned, Slice, Owned};
 use vm::ast::{Token, Nil, Cons, Atom};
 
 pub struct Environment {
@@ -14,6 +12,6 @@ impl Environment {
   }
 
   pub fn eval(&mut self, token: &Box<Token>) -> Box<Token> {
-    box Atom("Hello".to_owned())
+    box Atom("Hello".to_string())
   }
 }

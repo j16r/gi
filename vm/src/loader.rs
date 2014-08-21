@@ -1,6 +1,6 @@
 use std::io::File;
 use std::path::{Path};
-use vm::parser::{parse, ParseError};
+use vm::parser::parse;
 use vm::environment::{Environment};
 
 pub struct Loader {
