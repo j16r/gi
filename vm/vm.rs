@@ -3,8 +3,6 @@
 #![ author = "John Barker" ]
 #![feature(macro_rules)]
 
-extern crate std;
-
 #[path = "src"]
 mod vm {
   mod loader;
