@@ -66,7 +66,7 @@ impl Parser {
         Ok(box Nil)
       },
       Atom(ref text) => {
-        println!("Token: Atom = {:s}", text.as_slice());
+        println!("Atom({:s})", text.as_slice());
         let left = box Atom(text.to_string());
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))

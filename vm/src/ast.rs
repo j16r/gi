@@ -1,3 +1,4 @@
+#[deriving(Clone)]
 pub enum Token {
   Nil,
   True,
