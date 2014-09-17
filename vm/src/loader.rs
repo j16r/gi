@@ -1,7 +1,7 @@
 use std::io::File;
 use std::path::{Path};
-use vm::parser::parse;
-use vm::environment::{Environment};
+use parser::parse;
+use environment::{Environment};
 
 pub struct Loader {
   environment: Box<Environment>

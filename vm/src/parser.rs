@@ -1,4 +1,4 @@
-use vm::ast::{Token, Nil, Atom, OpenParen, CloseParen, Cons};
+use ast::{Token, Nil, Atom, OpenParen, CloseParen, Cons};
 use std::fmt;
 
 struct Parser {

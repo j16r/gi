@@ -1,4 +1,4 @@
-use vm::ast::{Token, Nil, Cons, Atom};
+use ast::{Token, Nil, Cons, Atom};
 
 pub struct Environment {
   world: Box<Token>,

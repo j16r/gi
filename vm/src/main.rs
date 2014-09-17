@@ -1,6 +1,11 @@
 use std::io;
 use std::os;
-use vm::loader::Loader;
+use loader::Loader;
+
+mod loader;
+mod parser;
+mod environment;
+mod ast;
 
 fn run(files: &[String]) {
   let mut loader = Loader::new();
