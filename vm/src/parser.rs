@@ -56,23 +56,19 @@ impl Parser {
     let token = try!(self.next_token());
     match *token {
       OpenParen => {
-        println!("(");
         let left = try!(self.parse_tail());
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
       },
       CloseParen => {
-        println!(")");
         Ok(box Nil)
       },
       Atom(ref text) => {
-        println!("Atom({:s})", text.as_slice());
         let left = box Atom(text.to_string());
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
       },
       _ => {
-        println!("token");
         let left = token;
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
