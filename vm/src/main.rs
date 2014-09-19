@@ -26,7 +26,7 @@ fn main() {
   if os_args.len() < 2 {
     print_usage()
   } else {
-    match os_args.get(1).as_slice() {
+    match os_args[1].as_slice() {
       "run" => run(os_args.slice(2, os_args.len())),
       _     => print_usage(),
     }
