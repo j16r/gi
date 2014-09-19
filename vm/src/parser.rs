@@ -63,11 +63,6 @@ impl Parser {
       CloseParen => {
         Ok(box Nil)
       },
-      Atom(ref text) => {
-        let left = box Atom(text.to_string());
-        let right = try!(self.parse_tail());
-        Ok(box Cons(left, right))
-      },
       _ => {
         let left = token;
         let right = try!(self.parse_tail());
