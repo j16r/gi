@@ -31,7 +31,6 @@ pub fn parse(program: String) -> ParserResult {
 
   match *try!(parser.next_token()) {
     OpenParen => {
-      println!("(");
       parser.parse_tail()
     },
     _ => Ok(box Nil)
@@ -108,7 +107,7 @@ impl Parser {
 
     let mut token = String::new();
     while !ch.is_whitespace() && ch != ')' {
-      token.push_char(ch);
+      token.push(ch);
       ch = self.current_char();
       self.advance_char();
     }
