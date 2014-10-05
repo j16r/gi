@@ -1,19 +1,19 @@
 use std::collections::HashMap;
-use ast::{Token, Nil, Cons, Atom};
+use ast::{Node, Nil, Cons, Atom};
 use parser;
 
-type Builtin = fn (&mut Environment, &Box<Token>) -> Box<Token>;
+type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
 pub struct Environment {
-  functions: Box<HashMap<String, Box<Token>>>
+  functions: Box<HashMap<String, Box<Node>>>
 }
 
-fn println(_: &mut Environment, args: &Box<Token>) -> Box<Token> {
+fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   println!("{:s}", parser::dump(args));
   box Nil
 }
 
-fn add(_: &mut Environment, args: &Box<Token>) -> Box<Token> {
+fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
     box Cons(ref lhs_token, ref tail) => {
       match *lhs_token {
@@ -50,7 +50,7 @@ impl Environment {
     }
   }
 
-  pub fn eval(&mut self, token: &Box<Token>) -> Box<Token> {
+  pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
     println!("Evaluating... {}", parser::dump(token));
     match *token {
       box Cons(ref head, ref tail) => {
@@ -66,7 +66,7 @@ impl Environment {
     }
   }
 
-  fn invoke_function(&mut self, name: &String, args: &Box<Token>) -> Box<Token> {
+  fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
     println!("Invoking {} with {}", name, parser::dump(args));
     match name.as_slice() {
       "println" => {

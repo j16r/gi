@@ -1,4 +1,5 @@
-use ast::{Token, Nil, Atom, OpenParen, CloseParen, Cons};
+use ast::{Node, Nil, Atom, Cons};
+use grammar::{Token, OpenParen, CloseParen, Identifier};
 use std::fmt;
 
 struct Parser {
@@ -9,7 +10,8 @@ struct Parser {
 
 pub struct ParseError {
   line_number: uint,
-  character: uint
+  character: uint,
+  explanation: &'static str
 }
 
 impl fmt::Show for ParseError {
@@ -18,7 +20,8 @@ impl fmt::Show for ParseError {
   }
 }
 
-type ParserResult = Result<Box<Token>, ParseError>;
+type ParserResult = Result<Box<Node>, ParseError>;
+type LexerResult = Result<Box<Token>, ParseError>;
 
 pub fn parse(program: String) -> ParserResult {
   let mut parser = Parser {
@@ -37,16 +40,13 @@ pub fn parse(program: String) -> ParserResult {
   }
 }
 
-pub fn dump(ast : &Box<Token>) -> String {
+pub fn dump(ast : &Box<Node>) -> String {
   match *ast {
     box Nil => "Nil".to_string(),
-    box OpenParen => "(".to_string(),
-    box CloseParen => ")".to_string(),
     box Atom(ref token) => token.to_string(),
     box Cons(ref first, ref rest) => {
       "Cons(".to_string() + dump(first) + ", " + dump(rest) + ")"
-    },
-    _ => "".to_string()
+    }
   }
 }
 
@@ -62,8 +62,8 @@ impl Parser {
       CloseParen => {
         Ok(box Nil)
       },
-      _ => {
-        let left = token;
+      Identifier(name) => {
+        let left = box Atom(name);
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
       }
@@ -86,9 +86,12 @@ impl Parser {
     self.position -= 1;
   }
 
-  fn next_token(&mut self) -> ParserResult {
+  fn next_token(&mut self) -> LexerResult {
     if self.eof() {
-      return Ok(box Nil);
+      return Err(ParseError {
+        line_number: 0,
+        character: self.position,
+        explanation: "End of file?"});
     }
 
     let mut ch = self.current_char();
@@ -116,7 +119,7 @@ impl Parser {
       self.rewind_char();
     }
 
-    Ok(box Atom(token))
+    Ok(box Identifier(token))
   }
 }
 
@@ -128,7 +131,7 @@ fn assert_parse_tree(input : &str, output : &str) {
 
 #[test]
 fn test_parse_empty_program() {
-  assert_parse_tree("", "Nil");
+  assert!(parse("".to_string()).is_err());
 }
 
 #[test]
