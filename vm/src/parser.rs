@@ -15,8 +15,8 @@ pub struct ParseError {
 }
 
 impl fmt::Show for ParseError {
-  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "{}:{}", self.line_number, self.character)
+  fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    write!(formatter, "{}:{}", self.line_number, self.character)
   }
 }
 
@@ -37,16 +37,6 @@ pub fn parse(program: String) -> ParserResult {
       parser.parse_tail()
     },
     _ => Ok(box Nil)
-  }
-}
-
-pub fn dump(ast : &Box<Node>) -> String {
-  match *ast {
-    box Nil => "Nil".to_string(),
-    box Atom(ref token) => token.to_string(),
-    box Cons(ref first, ref rest) => {
-      "Cons(".to_string() + dump(first) + ", " + dump(rest) + ")"
-    }
   }
 }
 
@@ -125,7 +115,7 @@ impl Parser {
 
 fn assert_parse_tree(input : &str, output : &str) {
   let ast = parse(input.to_string());
-  let formatted = dump(&ast.unwrap());
+  let formatted = ast.unwrap().to_string();
   assert_eq!(formatted, output.to_string());
 }
 
