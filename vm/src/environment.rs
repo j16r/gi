@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use ast::{Node, Nil, Cons, Atom};
+use ast::{Node, Nil, Cons, Atom, Integer32};
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
@@ -16,14 +16,12 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
     box Cons(ref lhs_token, ref tail) => {
       match *lhs_token {
-        box Atom(ref lhs_string) => {
+        box Integer32(ref lhs_value) => {
           match *tail {
             box Cons(ref rhs_token, _) => {
               match *rhs_token {
-                box Atom(ref rhs_string) => {
-                  let lhs_value : Option<int> = from_str(lhs_string.as_slice());
-                  let rhs_value : Option<int> = from_str(rhs_string.as_slice());
-                  box Atom((lhs_value.unwrap() + rhs_value.unwrap()).to_string())
+                box Integer32(ref rhs_value) => {
+                  box Integer32(*lhs_value + *rhs_value)
                 },
                 _ => fail!("second argument to add must be an Atom")
               }
@@ -36,10 +34,6 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     },
     _ => fail!("add requires two arguments")
   }
-}
-
-fn is_number_literal(string: &String) -> bool {
-  string.as_slice().chars().all(|c| c >= '0' && c <= '9')
 }
 
 impl Environment {
@@ -55,7 +49,7 @@ impl Environment {
       box Cons(ref head, ref tail) => {
         let result = &self.eval(tail);
         match *head {
-          box Atom(ref value) if is_number_literal(value) => token.clone(),
+          box Integer32(_) => token.clone(),
           box Atom(ref value) => self.invoke_function(value, result),
           box Cons(_, _) => self.eval(head),
           _ => fail!("Non atom token {} in function position", head)

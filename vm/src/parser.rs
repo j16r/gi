@@ -4,8 +4,9 @@ use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
 #[cfg(test)]
 use std::io::MemReader;
 
+use ast;
 use ast::{Node, Nil, Atom, Cons};
-use grammar::{Token, OpenParen, CloseParen, Identifier};
+use grammar::{Token, OpenParen, CloseParen, Identifier, Integer32};
 
 pub struct Parser<R> {
   reader: BufferedReader<R>,
@@ -67,6 +68,11 @@ impl<R: Reader> Parser<R> {
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
       },
+      Some(box Integer32(value)) => {
+        let left = box ast::Integer32(value);
+        let right = try!(self.parse_tail());
+        Ok(box Cons(left, right))
+      },
       None => Ok(box Nil)
     }
   }
@@ -107,6 +113,25 @@ impl<R: Reader> Parser<R> {
     }
   }
 
+  fn consume_i32(&mut self) -> LexerResult {
+    let mut token = String::from_char(1, self.current_char.unwrap());
+
+    loop {
+      match self.reader.read_char() {
+        Ok(ch) if ch.is_digit() => token.push(ch),
+        Ok(_) => {
+          self.current_char = None;
+          return Ok(Some(box Integer32(from_str(token.as_slice()).unwrap())))
+        },
+        Err(error) => return Err(ParseError {
+          line_number: self.line_number,
+          column: self.column,
+          explanation: format!("{}", error)
+        })
+      }
+    }
+  }
+
   fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
@@ -126,6 +151,7 @@ impl<R: Reader> Parser<R> {
         self.current_char = None;
         Ok(Some(box CloseParen))
       },
+      Some(ch) if ch.is_digit() => self.consume_i32(),
       Some(_) => self.consume_token(),
       None => Ok(None)
     }
@@ -159,5 +185,5 @@ fn test_parse_function() {
 fn test_parse_nested_function() {
   assert_parse_tree(
     "(println (conj 1 2))",
-    "Cons(println, Cons(Cons(conj, Cons(1, Cons(2, Nil))), Nil))");
+    "Cons(println, Cons(Cons(conj, Cons(1_i32, Cons(2_i32, Nil))), Nil))");
 }
