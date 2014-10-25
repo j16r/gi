@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use ast::{Node, Nil, Cons, Atom};
-use parser;
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 

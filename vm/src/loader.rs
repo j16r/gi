@@ -1,7 +1,9 @@
+use std::path::Path;
 use std::io::File;
-use std::path::{Path};
-use parser::parse;
-use environment::{Environment};
+use std::io::BufferedReader;
+
+use parser::Parser;
+use environment::Environment;
 
 pub struct Loader {
   environment: Box<Environment>
@@ -17,14 +19,20 @@ impl Loader {
     for filename in files.iter() {
       println!("loading {:s}", filename.as_slice());
 
-      let path = Path::new(filename.as_slice());
-      let mut file = File::open(&path).unwrap();
-      let contents = file.read_to_string();
+      let path = &Path::new(filename.as_slice());
+      let file = File::open(path).unwrap();
+      let reader = BufferedReader::new(file);
+      let mut parser = Parser::new(reader);
 
-      match parse(contents.unwrap()) {
-        Ok(ast) => { self.environment.eval(&ast); },
-        Err(_) => fail!("Parsing error")
-      }
+      let ast = match parser.parse() {
+        Ok(ast) => ast,
+        Err(error) => {
+          println!("Parser error:\n{}:{}", filename, error);
+          return
+        }
+      };
+
+      self.environment.eval(&ast);
     }
   }
 }

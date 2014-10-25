@@ -1,127 +1,148 @@
+use std::fmt;
+use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
+
+#[cfg(test)]
+use std::io::MemReader;
+
 use ast::{Node, Nil, Atom, Cons};
 use grammar::{Token, OpenParen, CloseParen, Identifier};
-use std::fmt;
 
-struct Parser {
-  input: String,
-  position: uint,
-  length: uint
+pub struct Parser<R> {
+  reader: BufferedReader<R>,
+  current_char: Option<char>,
+  line_number: uint,
+  column: uint
 }
 
 pub struct ParseError {
   line_number: uint,
-  character: uint,
-  explanation: &'static str
+  column: uint,
+  explanation: String
 }
 
 impl fmt::Show for ParseError {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-    write!(formatter, "{}:{}", self.line_number, self.character)
+    write!(formatter, "{}:{} {}",
+           self.line_number,
+           self.column,
+           self.explanation)
   }
 }
 
 type ParserResult = Result<Box<Node>, ParseError>;
-type LexerResult = Result<Box<Token>, ParseError>;
+type LexerResult = Result<Option<Box<Token>>, ParseError>;
 
-pub fn parse(program: String) -> ParserResult {
-  let mut parser = Parser {
-    input: program.to_string(),
-    position: 0,
-    length: program.len()
-  };
-
-  println!("Parsing {}", program);
-
-  match *try!(parser.next_token()) {
-    OpenParen => {
-      parser.parse_tail()
-    },
-    _ => Ok(box Nil)
+impl<R: Reader> Parser<R> {
+  pub fn new(reader: R) -> Parser<R> {
+    Parser {
+      reader: BufferedReader::new(reader),
+      current_char: None,
+      line_number: 0,
+      column: 0
+    }
   }
-}
 
-impl Parser {
+  pub fn parse(&mut self) -> ParserResult {
+    match try!(self.next_token()) {
+      Some(box OpenParen) => {
+        self.parse_tail()
+      },
+      _ => Ok(box Nil)
+    }
+  }
+  
   fn parse_tail(&mut self) -> ParserResult {
     let token = try!(self.next_token());
-    match *token {
-      OpenParen => {
+    match token {
+      Some(box OpenParen) => {
         let left = try!(self.parse_tail());
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
       },
-      CloseParen => {
+      Some(box CloseParen) => {
         Ok(box Nil)
       },
-      Identifier(name) => {
+      Some(box Identifier(name)) => {
         let left = box Atom(name);
         let right = try!(self.parse_tail());
         Ok(box Cons(left, right))
+      },
+      None => Ok(box Nil)
+    }
+  }
+
+  fn consume_whitespace(&mut self) -> IoResult<char> {
+    if self.current_char.is_some() {
+      return Ok(self.current_char.unwrap());
+    }
+
+    loop {
+      match self.reader.read_char() {
+        Ok(ch) if ch.is_whitespace() => (),
+        Ok(ch) => {
+          self.current_char = Some(ch);
+          return Ok(ch)
+        },
+        Err(e) => return Err(e)
       }
     }
   }
 
-  fn eof(&self) -> bool {
-    self.position == self.length
-  }
+  fn consume_token(&mut self) -> LexerResult {
+    let mut token = String::from_char(1, self.current_char.unwrap());
 
-  fn current_char(&self) -> char {
-    self.input.as_slice().char_at(self.position)
-  }
-
-  fn advance_char(&mut self) {
-    self.position += 1;
-  }
-
-  fn rewind_char(&mut self) {
-    self.position -= 1;
+    loop {
+      match self.reader.read_char() {
+        Ok(ch) if !ch.is_whitespace() && ch != ')' => token.push(ch),
+        Ok(_) => {
+          self.current_char = None;
+          return Ok(Some(box Identifier(token)))
+        },
+        Err(error) => return Err(ParseError {
+          line_number: self.line_number,
+          column: self.column,
+          explanation: format!("{}", error)
+        })
+      }
+    }
   }
 
   fn next_token(&mut self) -> LexerResult {
-    if self.eof() {
-      return Err(ParseError {
-        line_number: 0,
-        character: self.position,
-        explanation: "End of file?"});
+    match self.consume_whitespace() {
+      Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
+      Err(error) => return Err(ParseError {
+        line_number: self.line_number,
+        column: self.column,
+        explanation: format!("{}", error)
+      })
     }
 
-    let mut ch = self.current_char();
-    self.advance_char();
-
-    while ch.is_whitespace() {
-      self.advance_char();
+    match self.current_char {
+      Some('(') => {
+        self.current_char = None;
+        Ok(Some(box OpenParen))
+      },
+      Some(')') => {
+        self.current_char = None;
+        Ok(Some(box CloseParen))
+      },
+      Some(_) => self.consume_token(),
+      None => Ok(None)
     }
-
-    if ch == ')' {
-      return Ok(box CloseParen);
-    }
-    if ch == '(' {
-      return Ok(box OpenParen);
-    }
-
-    let mut token = String::new();
-    while !ch.is_whitespace() && ch != ')' {
-      token.push(ch);
-      ch = self.current_char();
-      self.advance_char();
-    }
-
-    if ch == ')' {
-      self.rewind_char();
-    }
-
-    Ok(box Identifier(token))
   }
 }
 
+#[cfg(test)]
 fn assert_parse_tree(input : &str, output : &str) {
-  let ast = parse(input.to_string());
+  let ast = Parser::new(MemReader::new(input.as_bytes().to_vec()))
+    .parse();
   let formatted = ast.unwrap().to_string();
   assert_eq!(formatted, output.to_string());
 }
 
 #[test]
 fn test_parse_empty_program() {
-  assert!(parse("".to_string()).is_err());
+  assert_parse_tree("", "Nil");
 }
 
 #[test]
