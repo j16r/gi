@@ -12,7 +12,7 @@ impl fmt::Show for Token {
     match *self {
       OpenParen => write!(formatter, "("),
       CloseParen => write!(formatter, ")"),
-      Identifier(ref name) => write!(formatter, "{:s}", name.as_slice()),
+      Identifier(ref name) => write!(formatter, "{:}", name.as_slice()),
       Integer32(ref val) => write!(formatter, "{}_i32", val)
     }
   }

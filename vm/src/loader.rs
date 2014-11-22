@@ -17,7 +17,7 @@ impl Loader {
 
   pub fn load(&mut self, files: &[String]) {
     for filename in files.iter() {
-      println!("loading {:s}", filename.as_slice());
+      println!("loading {:}", filename.as_slice());
 
       let path = &Path::new(filename.as_slice());
       let file = File::open(path).unwrap();
