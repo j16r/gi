@@ -23,16 +23,16 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
                 box Integer32(ref rhs_value) => {
                   box Integer32(*lhs_value + *rhs_value)
                 },
-                _ => fail!("second argument to add must be an Atom")
+                _ => panic!("second argument to add must be an Atom")
               }
             },
-            _ => fail!("add only takes two arguments, got more")
+            _ => panic!("add only takes two arguments, got more")
           }
         },
-        _ => fail!("first argument to add must be an Atom")
+        _ => panic!("first argument to add must be an Atom")
       }
     },
-    _ => fail!("add requires two arguments")
+    _ => panic!("add requires two arguments")
   }
 }
 
@@ -52,7 +52,7 @@ impl Environment {
           box Integer32(_) => token.clone(),
           box Atom(ref value) => self.invoke_function(value, result),
           box Cons(_, _) => self.eval(head),
-          _ => fail!("Non atom token {} in function position", head)
+          _ => panic!("Non atom token {} in function position", head)
         }
       },
       _ => token.clone()
