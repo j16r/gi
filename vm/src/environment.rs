@@ -1,5 +1,6 @@
 use std::collections::HashMap;
-use ast::{Node, Nil, Cons, Atom, Integer32};
+use ast::Node;
+use ast::Node::{Nil, Atom, Cons, Integer32};
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
@@ -9,7 +10,7 @@ pub struct Environment {
 
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   println!("{:}", args);
-  box Nil
+  box Node::Nil
 }
 
 fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {

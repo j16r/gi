@@ -4,9 +4,8 @@ use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
 #[cfg(test)]
 use std::io::MemReader;
 
-use ast;
-use ast::{Node, Nil, Atom, Cons};
-use grammar::{Token, OpenParen, CloseParen, Identifier, Integer32};
+use ast::Node;
+use grammar::Token;
 
 pub struct Parser<R> {
   reader: BufferedReader<R>,
@@ -45,35 +44,35 @@ impl<R: Reader> Parser<R> {
 
   pub fn parse(&mut self) -> ParserResult {
     match try!(self.next_token()) {
-      Some(box OpenParen) => {
+      Some(box Token::OpenParen) => {
         self.parse_tail()
       },
-      _ => Ok(box Nil)
+      _ => Ok(box Node::Nil)
     }
   }
   
   fn parse_tail(&mut self) -> ParserResult {
     let token = try!(self.next_token());
     match token {
-      Some(box OpenParen) => {
+      Some(box Token::OpenParen) => {
         let left = try!(self.parse_tail());
         let right = try!(self.parse_tail());
-        Ok(box Cons(left, right))
+        Ok(box Node::Cons(left, right))
       },
-      Some(box CloseParen) => {
-        Ok(box Nil)
+      Some(box Token::CloseParen) => {
+        Ok(box Node::Nil)
       },
-      Some(box Identifier(name)) => {
-        let left = box Atom(name);
+      Some(box Token::Identifier(name)) => {
+        let left = box Node::Atom(name);
         let right = try!(self.parse_tail());
-        Ok(box Cons(left, right))
+        Ok(box Node::Cons(left, right))
       },
-      Some(box Integer32(value)) => {
-        let left = box ast::Integer32(value);
+      Some(box Token::Integer32(value)) => {
+        let left = box Node::Integer32(value);
         let right = try!(self.parse_tail());
-        Ok(box Cons(left, right))
+        Ok(box Node::Cons(left, right))
       },
-      None => Ok(box Nil)
+      None => Ok(box Node::Nil)
     }
   }
 
@@ -102,7 +101,7 @@ impl<R: Reader> Parser<R> {
         Ok(ch) if !ch.is_whitespace() && ch != ')' => token.push(ch),
         Ok(_) => {
           self.current_char = None;
-          return Ok(Some(box Identifier(token)))
+          return Ok(Some(box Token::Identifier(token)))
         },
         Err(error) => return Err(ParseError {
           line_number: self.line_number,
@@ -121,7 +120,7 @@ impl<R: Reader> Parser<R> {
         Ok(ch) if ch.is_digit() => token.push(ch),
         Ok(_) => {
           self.current_char = None;
-          return Ok(Some(box Integer32(from_str(token.as_slice()).unwrap())))
+          return Ok(Some(box Token::Integer32(from_str(token.as_slice()).unwrap())))
         },
         Err(error) => return Err(ParseError {
           line_number: self.line_number,
@@ -145,11 +144,11 @@ impl<R: Reader> Parser<R> {
     match self.current_char {
       Some('(') => {
         self.current_char = None;
-        Ok(Some(box OpenParen))
+        Ok(Some(box Token::OpenParen))
       },
       Some(')') => {
         self.current_char = None;
-        Ok(Some(box CloseParen))
+        Ok(Some(box Token::CloseParen))
       },
       Some(ch) if ch.is_digit() => self.consume_i32(),
       Some(_) => self.consume_token(),
