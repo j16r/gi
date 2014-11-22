@@ -117,7 +117,7 @@ impl<R: Reader> Parser<R> {
 
     loop {
       match self.reader.read_char() {
-        Ok(ch) if ch.is_digit() => token.push(ch),
+        Ok(ch) if ch.is_digit(10) => token.push(ch),
         Ok(_) => {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(from_str(token.as_slice()).unwrap())))
@@ -150,7 +150,7 @@ impl<R: Reader> Parser<R> {
         self.current_char = None;
         Ok(Some(box Token::CloseParen))
       },
-      Some(ch) if ch.is_digit() => self.consume_i32(),
+      Some(ch) if ch.is_digit(10) => self.consume_i32(),
       Some(_) => self.consume_token(),
       None => Ok(None)
     }
