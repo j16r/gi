@@ -95,6 +95,25 @@ impl<R: Reader> Lexer<R> {
     }
   }
 
+  fn consume_string_literal(&mut self) -> LexerResult {
+    let mut token = String::new();
+
+    loop {
+      match self.reader.read_char() {
+        Ok('"') => {
+          self.current_char = None;
+          return Ok(Some(box Token::U8String(token)))
+        },
+        Ok(ch) => token.push(ch),
+        Err(error) => return Err(LexerError {
+          line_number: self.line_number,
+          column: self.column,
+          explanation: format!("{}", error)
+        })
+      }
+    }
+  }
+
   pub fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
@@ -115,6 +134,7 @@ impl<R: Reader> Lexer<R> {
         Ok(Some(box Token::CloseParen))
       },
       Some(ch) if ch.is_digit(10) || ch == '-' => self.consume_i32(),
+      Some('"') => self.consume_string_literal(),
       Some(_) => self.consume_token(),
       None => Ok(None)
     }
@@ -154,3 +174,13 @@ fn test_parse_int32() {
   assert_next_token!("-42", Ok(Some(box Token::Integer32(-42))));
 }
 
+#[test]
+fn test_parse_string_literal() {
+  let next_token = Lexer::new(MemReader::new("\"s\"".as_bytes().to_vec()))
+      .next_token();
+
+  match next_token {
+    Ok(Some(box Token::U8String(ref exp))) if *exp == "s".to_string() => (),
+    result => panic!("Failed to parse \"s\", got token {}", result)
+  }
+}

@@ -5,7 +5,8 @@ pub enum Node {
   Nil,
   Atom(String),
   Cons(Box<Node>, Box<Node>),
-  Integer32(i32)
+  Integer32(i32),
+  U8String(String)
 }
 
 impl fmt::Show for Node {
@@ -14,7 +15,8 @@ impl fmt::Show for Node {
       Node::Nil => write!(formatter, "Nil"),
       Node::Atom(ref token) => write!(formatter, "{:}", token.as_slice()),
       Node::Cons(ref first, ref rest) => write!(formatter, "Cons({}, {})", first, rest),
-      Node::Integer32(ref val) => write!(formatter, "{}_i32", val)
+      Node::Integer32(ref val) => write!(formatter, "{}_i32", val),
+      Node::U8String(ref val) => write!(formatter, "\"{:}\"", val.as_slice())
     }
   }
 }

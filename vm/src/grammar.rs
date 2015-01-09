@@ -5,6 +5,7 @@ pub enum Token {
   CloseParen,
   Identifier(String),
   Integer32(i32),
+  U8String(String),
 }
 
 impl fmt::Show for Token {
@@ -13,7 +14,8 @@ impl fmt::Show for Token {
       Token::OpenParen => write!(formatter, "("),
       Token::CloseParen => write!(formatter, ")"),
       Token::Identifier(ref name) => write!(formatter, "{:}", name.as_slice()),
-      Token::Integer32(ref val) => write!(formatter, "{}_i32", val)
+      Token::Integer32(ref val) => write!(formatter, "{}_i32", val),
+      Token::U8String(ref val) => write!(formatter, "\"{:}\"", val.as_slice())
     }
   }
 }

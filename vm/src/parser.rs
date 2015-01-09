@@ -76,6 +76,11 @@ impl<R: Reader> Parser<R> {
         let right = try!(self.parse_tail());
         Ok(box Node::Cons(left, right))
       },
+      Some(box Token::U8String(value)) => {
+        let left = box Node::U8String(value);
+        let right = try!(self.parse_tail());
+        Ok(box Node::Cons(left, right))
+      },
       None => Ok(box Node::Nil)
     }
   }
