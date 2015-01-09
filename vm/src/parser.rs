@@ -1,5 +1,6 @@
 use std::fmt;
 use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
+use std::error::FromError;
 
 #[cfg(test)]
 use std::io::MemReader;
@@ -14,13 +15,28 @@ pub struct Parser<R> {
   column: uint
 }
 
-pub struct ParseError {
+pub struct ParserError {
   line_number: uint,
   column: uint,
   explanation: String
 }
 
-impl fmt::Show for ParseError {
+pub struct LexerError {
+  line_number: uint,
+  column: uint,
+  explanation: String
+}
+
+impl FromError<LexerError> for ParserError {
+    fn from_error(error: LexerError) -> Self {
+        ParserError{
+            line_number: error.line_number,
+            column: error.column,
+            explanation: error.explanation}
+    }
+}
+
+impl fmt::Show for ParserError {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
     write!(formatter, "{}:{} {}",
            self.line_number,
@@ -29,8 +45,8 @@ impl fmt::Show for ParseError {
   }
 }
 
-type ParserResult = Result<Box<Node>, ParseError>;
-type LexerResult = Result<Option<Box<Token>>, ParseError>;
+type ParserResult = Result<Box<Node>, ParserError>;
+type LexerResult = Result<Option<Box<Token>>, LexerError>;
 
 impl<R: Reader> Parser<R> {
   pub fn new(reader: R) -> Parser<R> {
@@ -103,7 +119,7 @@ impl<R: Reader> Parser<R> {
           self.current_char = None;
           return Ok(Some(box Token::Identifier(token)))
         },
-        Err(error) => return Err(ParseError {
+        Err(error) => return Err(LexerError {
           line_number: self.line_number,
           column: self.column,
           explanation: format!("{}", error)
@@ -122,7 +138,7 @@ impl<R: Reader> Parser<R> {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
-        Err(error) => return Err(ParseError {
+        Err(error) => return Err(LexerError {
           line_number: self.line_number,
           column: self.column,
           explanation: format!("{}", error)
@@ -134,7 +150,7 @@ impl<R: Reader> Parser<R> {
   fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
-      Err(error) => return Err(ParseError {
+      Err(error) => return Err(LexerError {
         line_number: self.line_number,
         column: self.column,
         explanation: format!("{}", error)
