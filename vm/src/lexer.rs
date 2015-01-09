@@ -82,7 +82,7 @@ impl<R: Reader> Lexer<R> {
     loop {
       match self.reader.read_char() {
         Ok(ch) if ch.is_digit(10) => token.push(ch),
-        Ok(_) => {
+        Ok(_) | Err(IoError { kind: EndOfFile, .. }) => {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
@@ -114,7 +114,7 @@ impl<R: Reader> Lexer<R> {
         self.current_char = None;
         Ok(Some(box Token::CloseParen))
       },
-      Some(ch) if ch.is_digit(10) => self.consume_i32(),
+      Some(ch) if ch.is_digit(10) || ch == '-' => self.consume_i32(),
       Some(_) => self.consume_token(),
       None => Ok(None)
     }
@@ -147,3 +147,10 @@ fn test_parse_open_paren() {
 fn test_parse_close_paren() {
   assert_next_token!(")", Ok(Some(box Token::CloseParen)));
 }
+
+#[test]
+fn test_parse_int32() {
+  assert_next_token!("3298", Ok(Some(box Token::Integer32(3298))));
+  assert_next_token!("-42", Ok(Some(box Token::Integer32(-42))));
+}
+
