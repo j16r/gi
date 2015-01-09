@@ -72,8 +72,8 @@ impl Environment {
         self.eval(result)
       },
       _ => {
-        let function = &self.functions.get_copy(name);
-        self.eval(function)
+        let function = self.functions.get(name).cloned().unwrap();
+        self.eval(&function)
       }
     }
   }

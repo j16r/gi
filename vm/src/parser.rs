@@ -94,7 +94,7 @@ impl<R: Reader> Parser<R> {
   }
 
   fn consume_token(&mut self) -> LexerResult {
-    let mut token = String::from_char(1, self.current_char.unwrap());
+    let mut token = self.current_char.unwrap().to_string();
 
     loop {
       match self.reader.read_char() {
@@ -113,14 +113,14 @@ impl<R: Reader> Parser<R> {
   }
 
   fn consume_i32(&mut self) -> LexerResult {
-    let mut token = String::from_char(1, self.current_char.unwrap());
+    let mut token = self.current_char.unwrap().to_string();
 
     loop {
       match self.reader.read_char() {
         Ok(ch) if ch.is_digit(10) => token.push(ch),
         Ok(_) => {
           self.current_char = None;
-          return Ok(Some(box Token::Integer32(from_str(token.as_slice()).unwrap())))
+          return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
         Err(error) => return Err(ParseError {
           line_number: self.line_number,
