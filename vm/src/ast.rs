@@ -1,6 +1,6 @@
 use std::fmt;
 
-#[deriving(Clone)]
+#[derive(Clone)]
 pub enum Node {
   Nil,
   Atom(String),
