@@ -7,6 +7,7 @@ mod parser;
 mod environment;
 mod ast;
 mod grammar;
+mod lexer;
 
 fn run(files: &[String]) {
   let mut loader = Loader::new();

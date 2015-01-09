@@ -1,5 +1,4 @@
 use std::fmt;
-use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
 use std::error::FromError;
 
 #[cfg(test)]
@@ -7,12 +6,10 @@ use std::io::MemReader;
 
 use ast::Node;
 use grammar::Token;
+use lexer::{Lexer, LexerResult, LexerError};
 
 pub struct Parser<R> {
-  reader: BufferedReader<R>,
-  current_char: Option<char>,
-  line_number: uint,
-  column: uint
+  lexer: Lexer<R>
 }
 
 pub struct ParserError {
@@ -21,18 +18,13 @@ pub struct ParserError {
   explanation: String
 }
 
-pub struct LexerError {
-  line_number: uint,
-  column: uint,
-  explanation: String
-}
-
 impl FromError<LexerError> for ParserError {
     fn from_error(error: LexerError) -> Self {
-        ParserError{
+        ParserError {
             line_number: error.line_number,
             column: error.column,
-            explanation: error.explanation}
+            explanation: error.explanation
+        }
     }
 }
 
@@ -46,20 +38,16 @@ impl fmt::Show for ParserError {
 }
 
 type ParserResult = Result<Box<Node>, ParserError>;
-type LexerResult = Result<Option<Box<Token>>, LexerError>;
 
 impl<R: Reader> Parser<R> {
   pub fn new(reader: R) -> Parser<R> {
     Parser {
-      reader: BufferedReader::new(reader),
-      current_char: None,
-      line_number: 0,
-      column: 0
+      lexer: Lexer::new(reader)
     }
   }
 
   pub fn parse(&mut self) -> ParserResult {
-    match try!(self.next_token()) {
+    match try!(self.lexer.next_token()) {
       Some(box Token::OpenParen) => {
         self.parse_tail()
       },
@@ -68,7 +56,7 @@ impl<R: Reader> Parser<R> {
   }
   
   fn parse_tail(&mut self) -> ParserResult {
-    let token = try!(self.next_token());
+    let token = try!(self.lexer.next_token());
     match token {
       Some(box Token::OpenParen) => {
         let left = try!(self.parse_tail());
@@ -91,90 +79,10 @@ impl<R: Reader> Parser<R> {
       None => Ok(box Node::Nil)
     }
   }
-
-  fn consume_whitespace(&mut self) -> IoResult<char> {
-    if self.current_char.is_some() {
-      return Ok(self.current_char.unwrap());
-    }
-
-    loop {
-      match self.reader.read_char() {
-        Ok(ch) if ch.is_whitespace() => (),
-        Ok(ch) => {
-          self.current_char = Some(ch);
-          return Ok(ch)
-        },
-        Err(e) => return Err(e)
-      }
-    }
-  }
-
-  fn consume_token(&mut self) -> LexerResult {
-    let mut token = self.current_char.unwrap().to_string();
-
-    loop {
-      match self.reader.read_char() {
-        Ok(ch) if !ch.is_whitespace() && ch != ')' => token.push(ch),
-        Ok(_) => {
-          self.current_char = None;
-          return Ok(Some(box Token::Identifier(token)))
-        },
-        Err(error) => return Err(LexerError {
-          line_number: self.line_number,
-          column: self.column,
-          explanation: format!("{}", error)
-        })
-      }
-    }
-  }
-
-  fn consume_i32(&mut self) -> LexerResult {
-    let mut token = self.current_char.unwrap().to_string();
-
-    loop {
-      match self.reader.read_char() {
-        Ok(ch) if ch.is_digit(10) => token.push(ch),
-        Ok(_) => {
-          self.current_char = None;
-          return Ok(Some(box Token::Integer32(token.parse().unwrap())))
-        },
-        Err(error) => return Err(LexerError {
-          line_number: self.line_number,
-          column: self.column,
-          explanation: format!("{}", error)
-        })
-      }
-    }
-  }
-
-  fn next_token(&mut self) -> LexerResult {
-    match self.consume_whitespace() {
-      Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
-      Err(error) => return Err(LexerError {
-        line_number: self.line_number,
-        column: self.column,
-        explanation: format!("{}", error)
-      })
-    }
-
-    match self.current_char {
-      Some('(') => {
-        self.current_char = None;
-        Ok(Some(box Token::OpenParen))
-      },
-      Some(')') => {
-        self.current_char = None;
-        Ok(Some(box Token::CloseParen))
-      },
-      Some(ch) if ch.is_digit(10) => self.consume_i32(),
-      Some(_) => self.consume_token(),
-      None => Ok(None)
-    }
-  }
 }
 
 #[cfg(test)]
-fn assert_parse_tree(input : &str, output : &str) {
+fn assert_parse_tree(input: &str, output: &str) {
   let ast = Parser::new(MemReader::new(input.as_bytes().to_vec()))
     .parse();
   let formatted = ast.unwrap().to_string();
