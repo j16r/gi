@@ -104,6 +104,12 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::U8String(token)))
         },
+        Ok('\\') => {
+          match self.reader.read_char() {
+            Ok(ch) => token.push(ch),
+            _ => panic!("Uh oh!")
+          }
+        },
         Ok(ch) => token.push(ch),
         Err(error) => return Err(LexerError {
           line_number: self.line_number,
@@ -181,6 +187,14 @@ fn test_parse_string_literal() {
 
   match next_token {
     Ok(Some(box Token::U8String(ref exp))) if *exp == "s".to_string() => (),
+    result => panic!("Failed to parse \"s\", got token {}", result)
+  }
+
+  let next_token = Lexer::new(MemReader::new("\"s \\\"s\\\"\"".as_bytes().to_vec()))
+      .next_token();
+
+  match next_token {
+    Ok(Some(box Token::U8String(ref exp))) if *exp == "s \"s\"".to_string() => (),
     result => panic!("Failed to parse \"s\", got token {}", result)
   }
 }

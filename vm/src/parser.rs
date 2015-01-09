@@ -110,6 +110,11 @@ fn test_parse_function() {
 }
 
 #[test]
+fn test_parse_string_literal() {
+  assert_parse_tree("(println \"string\")", "Cons(println, Cons(\"string\", Nil))");
+}
+
+#[test]
 fn test_parse_nested_function() {
   assert_parse_tree(
     "(println (conj 1 2))",
