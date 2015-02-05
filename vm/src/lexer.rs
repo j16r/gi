@@ -67,11 +67,7 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::Identifier(token)))
         },
-        Err(error) => return Err(LexerError {
-          line_number: self.line_number,
-          column: self.column,
-          explanation: format!("{}", error)
-        })
+        Err(error) => return self.lexer_error(error.description())
       }
     }
   }
@@ -86,11 +82,7 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
-        Err(error) => return Err(LexerError {
-          line_number: self.line_number,
-          column: self.column,
-          explanation: format!("{}", error)
-        })
+        Err(error) => return self.lexer_error(error.to_string())
       }
     }
   }
@@ -111,23 +103,23 @@ impl<R: Reader> Lexer<R> {
           }
         },
         Ok(ch) => token.push(ch),
-        Err(error) => return Err(LexerError {
-          line_number: self.line_number,
-          column: self.column,
-          explanation: format!("{}", error)
-        })
+        Err(error) => return self.lexer_error(error.to_string())
       }
     }
+  }
+
+  fn lexer_error(&self, explanation: &str) -> LexerResult {
+    Err(LexerError {
+        line_number: self.line_number,
+        column: self.column,
+        explanation: format!("{}", explanation)
+    })
   }
 
   pub fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
-      Err(error) => return Err(LexerError {
-        line_number: self.line_number,
-        column: self.column,
-        explanation: format!("{}", error)
-      })
+      Err(error) => return self.lexer_error(error.to_string())
     }
 
     match self.current_char {
