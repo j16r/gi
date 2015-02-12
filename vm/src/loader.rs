@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::old_path::Path;
 use std::old_io::File;
 use std::old_io::BufferedReader;
 
