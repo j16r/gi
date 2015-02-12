@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use ast::Node;
-use ast::Node::{Nil, Atom, Cons, Integer32};
+use ast::Node::{Nil, Atom, Cons, Integer32, U8String};
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
@@ -45,18 +45,20 @@ impl Environment {
   }
 
   pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
-    println!("Evaluating... {:?}", token);
     match *token {
       box Cons(ref head, ref tail) => {
         let result = &self.eval(tail);
+        println!("Evaluating... {:?}", token);
         match *head {
-          box Integer32(_) => token.clone(),
           box Atom(ref value) => self.invoke_function(value, result),
           box Cons(_, _) => self.eval(head),
-          _ => panic!("Non atom token {:?} in function position", head)
+          _ => token.clone()
         }
       },
-      _ => token.clone()
+      _ => {
+        println!("Evaluating... {:?}", token);
+        token.clone()
+      }
     }
   }
 
