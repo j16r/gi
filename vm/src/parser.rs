@@ -2,19 +2,19 @@ use std::fmt;
 use std::error::FromError;
 
 #[cfg(test)]
-use std::io::MemReader;
+use std::old_io::MemReader;
 
 use ast::Node;
 use grammar::Token;
-use lexer::{Lexer, LexerResult, LexerError};
+use lexer::{Lexer, LexerError};
 
 pub struct Parser<R> {
   lexer: Lexer<R>
 }
 
 pub struct ParserError {
-  line_number: uint,
-  column: uint,
+  line_number: usize,
+  column: usize,
   explanation: String
 }
 
@@ -28,7 +28,7 @@ impl FromError<LexerError> for ParserError {
     }
 }
 
-impl fmt::Show for ParserError {
+impl fmt::Debug for ParserError {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
     write!(formatter, "{}:{} {}",
            self.line_number,
@@ -90,7 +90,7 @@ impl<R: Reader> Parser<R> {
 fn assert_parse_tree(input: &str, output: &str) {
   let ast = Parser::new(MemReader::new(input.as_bytes().to_vec()))
     .parse();
-  let formatted = ast.unwrap().to_string();
+  let formatted = format!("{:?}", ast.unwrap());
   assert_eq!(formatted, output.to_string());
 }
 

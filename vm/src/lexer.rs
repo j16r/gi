@@ -1,27 +1,27 @@
 use std::fmt;
-use std::io::{BufferedReader, IoResult, IoError, EndOfFile};
+use std::old_io::{BufferedReader, IoResult, IoError, EndOfFile};
 
 #[cfg(test)]
-use std::io::MemReader;
+use std::old_io::MemReader;
 
 use grammar::Token;
 
 pub struct Lexer<R> {
   reader: BufferedReader<R>,
   current_char: Option<char>,
-  line_number: uint,
-  column: uint
+  line_number: usize,
+  column: usize
 }
 
 pub struct LexerError {
-  pub line_number: uint,
-  pub column: uint,
+  pub line_number: usize,
+  pub column: usize,
   pub explanation: String
 }
 
 pub type LexerResult = Result<Option<Box<Token>>, LexerError>;
 
-impl fmt::Show for LexerError {
+impl fmt::Display for LexerError {
   fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
     write!(formatter, "{}:{} {}",
            self.line_number,
@@ -67,7 +67,7 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::Identifier(token)))
         },
-        Err(error) => return self.lexer_error(error.description())
+        Err(error) => return self.lexer_error(error.desc)
       }
     }
   }
@@ -82,7 +82,7 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
-        Err(error) => return self.lexer_error(error.to_string())
+        Err(error) => return self.lexer_error(error.to_string().as_slice())
       }
     }
   }
@@ -103,7 +103,7 @@ impl<R: Reader> Lexer<R> {
           }
         },
         Ok(ch) => token.push(ch),
-        Err(error) => return self.lexer_error(error.to_string())
+        Err(error) => return self.lexer_error(error.to_string().as_slice())
       }
     }
   }
@@ -119,7 +119,7 @@ impl<R: Reader> Lexer<R> {
   pub fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
-      Err(error) => return self.lexer_error(error.to_string())
+      Err(error) => return self.lexer_error(error.to_string().as_slice())
     }
 
     match self.current_char {
@@ -146,7 +146,8 @@ macro_rules! assert_next_token {
 
     match next_token {
       $expected => (),
-      result => panic!("Failed to parse \"{}\", got token {}", $input, result)
+      Ok(token) => panic!("Expected token \"{:?}\", got {:?}", $input, token),
+      Err(error) => panic!("Failed to parse \"{:?}\", got error {}", $input, error)
     }
   })
 }
@@ -179,7 +180,8 @@ fn test_parse_string_literal() {
 
   match next_token {
     Ok(Some(box Token::U8String(ref exp))) if *exp == "s".to_string() => (),
-    result => panic!("Failed to parse \"s\", got token {}", result)
+    Ok(token) => panic!("Expected token \"?\", got {:?}", token),
+    Err(error) => panic!("Failed to parse \"s\", got token {}", error)
   }
 
   let next_token = Lexer::new(MemReader::new("\"s \\\"s\\\"\"".as_bytes().to_vec()))
@@ -187,6 +189,7 @@ fn test_parse_string_literal() {
 
   match next_token {
     Ok(Some(box Token::U8String(ref exp))) if *exp == "s \"s\"".to_string() => (),
-    result => panic!("Failed to parse \"s\", got token {}", result)
+    Ok(token) => panic!("Expected token \"?\", got {:?}", token),
+    Err(error) => panic!("Failed to parse \"s\", got token {}", error)
   }
 }

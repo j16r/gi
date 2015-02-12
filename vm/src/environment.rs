@@ -9,7 +9,7 @@ pub struct Environment {
 }
 
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-  println!("{:}", args);
+  println!("{:?}", args);
   box Node::Nil
 }
 
@@ -45,7 +45,7 @@ impl Environment {
   }
 
   pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
-    println!("Evaluating... {}", token);
+    println!("Evaluating... {:?}", token);
     match *token {
       box Cons(ref head, ref tail) => {
         let result = &self.eval(tail);
@@ -53,7 +53,7 @@ impl Environment {
           box Integer32(_) => token.clone(),
           box Atom(ref value) => self.invoke_function(value, result),
           box Cons(_, _) => self.eval(head),
-          _ => panic!("Non atom token {} in function position", head)
+          _ => panic!("Non atom token {:?} in function position", head)
         }
       },
       _ => token.clone()
@@ -61,7 +61,7 @@ impl Environment {
   }
 
   fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
-    println!("Invoking {} with {}", name, args);
+    println!("Invoking {:?} with {:?}", name, args);
     match name.as_slice() {
       "println" => {
         let result = &println(self, args);

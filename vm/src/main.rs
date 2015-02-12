@@ -1,4 +1,6 @@
-use std::io;
+#![feature(box_syntax)]
+
+use std::old_io;
 use std::os;
 use loader::Loader;
 
@@ -15,21 +17,20 @@ fn run(files: &[String]) {
 }
 
 fn print_usage() {
-  io::print("gi is frontend for the gi language and framework\n\
+  old_io::print("gi is frontend for the gi language and framework\n\
              usage: gi <command> ...\n\
              \n\
              \trun <filename>\tRun some gi source code\n");
 }
 
-#[main]
 fn main() {
   let os_args = os::args();
 
   if os_args.len() < 2 {
     print_usage()
   } else {
-    match os_args[1].as_slice() {
-      "run" => run(os_args.slice(2, os_args.len())),
+    match &os_args[1][] {
+      "run" => run(&os_args[2 .. os_args.len()]),
       _     => print_usage(),
     }
   }
