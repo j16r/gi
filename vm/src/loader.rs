@@ -20,10 +20,16 @@ impl Loader {
       println!("loading {:?}", &filename);
 
       let path = &Path::new(&filename);
-      let file = File::open(path).unwrap();
+      let file = match File::open(path) {
+          Ok(file) => file,
+          Err(error) => {
+              println!("Failed to open file {}", filename);
+              return
+          }
+      };
+
       let reader = BufferedReader::new(file);
       let mut parser = Parser::new(reader);
-
       let ast = match parser.parse() {
         Ok(ast) => ast,
         Err(error) => {
