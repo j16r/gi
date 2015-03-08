@@ -1,8 +1,10 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
+#![feature(old_io)]
+#![feature(old_path)]
+#![feature(core)]
+#![feature(unicode)]
 
-use std::old_io;
-use std::os;
 use loader::Loader;
 
 mod loader;
@@ -18,20 +20,20 @@ fn run(files: &[String]) {
 }
 
 fn print_usage() {
-  old_io::print("gi is frontend for the gi language and framework\n\
-             usage: gi <command> ...\n\
-             \n\
-             \trun <filename>\tRun some gi source code\n");
+  print!("gi is the frontend for the gi language and framework\n\
+          usage: gi <command> ...\n\
+          \n\
+          \trun <filename>\tRun some gi source code\n");
 }
 
 fn main() {
-  let os_args = os::args();
+  let args: Vec<_> = ::std::env::args().collect();
 
-  if os_args.len() < 2 {
+  if args.len() < 2 {
     print_usage()
   } else {
-    match &os_args[1][] {
-      "run" => run(&os_args[2 .. os_args.len()]),
+    match &args[1][..] {
+      "run" => run(&args[2 .. args.len()]),
       _     => print_usage(),
     }
   }

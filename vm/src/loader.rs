@@ -17,9 +17,9 @@ impl Loader {
 
   pub fn load(&mut self, files: &[String]) {
     for filename in files.iter() {
-      println!("loading {:?}", &filename[]);
+      println!("loading {:?}", &filename);
 
-      let path = &Path::new(&filename[]);
+      let path = &Path::new(&filename);
       let file = File::open(path).unwrap();
       let reader = BufferedReader::new(file);
       let mut parser = Parser::new(reader);

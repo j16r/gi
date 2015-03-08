@@ -82,7 +82,7 @@ impl<R: Reader> Lexer<R> {
           self.current_char = None;
           return Ok(Some(box Token::Integer32(token.parse().unwrap())))
         },
-        Err(error) => return self.lexer_error(error.to_string().as_slice())
+        Err(error) => return self.lexer_error(&error.to_string()[..])
       }
     }
   }
@@ -103,7 +103,7 @@ impl<R: Reader> Lexer<R> {
           }
         },
         Ok(ch) => token.push(ch),
-        Err(error) => return self.lexer_error(error.to_string().as_slice())
+        Err(error) => return self.lexer_error(&error.to_string()[..])
       }
     }
   }
@@ -119,7 +119,7 @@ impl<R: Reader> Lexer<R> {
   pub fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
       Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
-      Err(error) => return self.lexer_error(error.to_string().as_slice())
+      Err(error) => return self.lexer_error(&error.to_string()[..])
     }
 
     match self.current_char {
