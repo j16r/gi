@@ -16,7 +16,7 @@ mod lexer;
 
 fn run(files: &[String]) {
   let mut loader = Loader::new();
-  loader.load(files)
+  loader.load(files);
 }
 
 fn print_usage() {

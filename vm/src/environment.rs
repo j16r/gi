@@ -8,8 +8,25 @@ pub struct Environment {
   functions: Box<HashMap<String, Box<Node>>>
 }
 
+fn first(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, _) => box Cons(lhs_token.clone(), box Nil),
+    _ => panic!("WTF?")
+  }
+}
+
+fn rest(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(_, ref rhs_token) => box Cons(rhs_token.clone(), box Nil),
+    _ => panic!("WTF?")
+  }
+}
+
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-  println!("{:?}", args);
+  match *args {
+    box Cons(ref lhs_token, _) => println!("{:?}", lhs_token),
+    _ => println!("{:?}", args)
+  }
   box Node::Nil
 }
 
@@ -64,7 +81,15 @@ impl Environment {
 
   fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
     println!("Invoking {:?} with {:?}", name, args);
-    match name.as_slice() {
+    match &name[..] {
+      "first" => {
+        let result = &first(self, args);
+        self.eval(result)
+      },
+      "rest" => {
+        let result = &rest(self, args);
+        self.eval(result)
+      },
       "println" => {
         let result = &println(self, args);
         self.eval(result)
