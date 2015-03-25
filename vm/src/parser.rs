@@ -1,4 +1,5 @@
 use std::fmt;
+use std::old_io::Reader;
 use std::error::FromError;
 
 #[cfg(test)]

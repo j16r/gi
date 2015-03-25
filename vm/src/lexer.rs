@@ -1,5 +1,5 @@
 use std::fmt;
-use std::old_io::{BufferedReader, IoResult, IoError, EndOfFile};
+use std::old_io::{Reader, Buffer, BufferedReader, IoResult, IoError, EndOfFile};
 
 #[cfg(test)]
 use std::old_io::MemReader;
