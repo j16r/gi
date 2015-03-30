@@ -70,6 +70,54 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   }
 }
 
+fn mul(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, ref tail) => {
+      match *lhs_token {
+        box Integer32(ref lhs_value) => {
+          match *tail {
+            box Cons(ref rhs_token, _) => {
+              match *rhs_token {
+                box Integer32(ref rhs_value) => {
+                  box Integer32(*lhs_value * *rhs_value)
+                },
+                _ => panic!("second argument to mul must be an Atom")
+              }
+            },
+            _ => panic!("mul only takes two arguments, got more")
+          }
+        },
+        _ => panic!("first argument to mul must be an Atom")
+      }
+    },
+    _ => panic!("mul requires two arguments")
+  }
+}
+
+fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, ref tail) => {
+      match *lhs_token {
+        box Integer32(ref lhs_value) => {
+          match *tail {
+            box Cons(ref rhs_token, _) => {
+              match *rhs_token {
+                box Integer32(ref rhs_value) => {
+                  box Integer32(*lhs_value / *rhs_value)
+                },
+                _ => panic!("second argument to div must be an Atom")
+              }
+            },
+            _ => panic!("div only takes two arguments, got more")
+          }
+        },
+        _ => panic!("first argument to div must be an Atom")
+      }
+    },
+    _ => panic!("div requires two arguments")
+  }
+}
+
 impl Environment {
   pub fn new() -> Box<Environment> {
     box Environment {
@@ -117,6 +165,14 @@ impl Environment {
       },
       "add" => {
         let result = &add(self, args);
+        self.eval(result)
+      },
+      "mul" => {
+        let result = &mul(self, args);
+        self.eval(result)
+      },
+      "div" => {
+        let result = &div(self, args);
         self.eval(result)
       },
       _ => {
