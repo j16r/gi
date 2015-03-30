@@ -1,1 +1,1 @@
-(dumpln (add 1 2))
+(dump (add 1 2))

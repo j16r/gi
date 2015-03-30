@@ -1,1 +1,1 @@
-(dumpln (first "first" "second" "third"))
+(dump (first "first" "second" "third"))

@@ -38,6 +38,14 @@ fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   box Node::Nil
 }
 
+fn dump(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, _) => print!("{}", lhs_token),
+    _ => print!("{}", args)
+  }
+  box Node::Nil
+}
+
 fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
     box Cons(ref lhs_token, ref tail) => {
@@ -103,13 +111,19 @@ impl Environment {
         let result = &dumpln(self, args);
         self.eval(result)
       },
+      "dump" => {
+        let result = &dump(self, args);
+        self.eval(result)
+      },
       "add" => {
         let result = &add(self, args);
         self.eval(result)
       },
       _ => {
-        let function = self.functions.get(name).cloned().unwrap();
-        self.eval(&function)
+        match self.functions.get(name).cloned() {
+          Some(function) => self.eval(&function),
+          None => panic!("Tried to invoke function {:?} but there was none in scope", name)
+        }
       }
     }
   }

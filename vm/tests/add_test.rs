@@ -8,5 +8,5 @@ fn add() {
         .unwrap()
         .stdout;
 
-    assert_eq!(String::from_utf8_lossy(&stdout), "3\n");
+    assert_eq!(String::from_utf8_lossy(&stdout), "3");
 }
