@@ -3,7 +3,7 @@ use std::process::Command;
 #[test]
 fn add() {
     let stdout = Command::new("target/gi_vm")
-        .args(&["run", "tests/add_test.gi"])
+        .args(&["run", "tests/add_two_small_ints.gi"])
         .output()
         .unwrap()
         .stdout;
