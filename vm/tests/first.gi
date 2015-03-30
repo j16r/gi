@@ -1,1 +1,1 @@
-(println (first "first" "second" "third"))
+(dumpln (first "first" "second" "third"))

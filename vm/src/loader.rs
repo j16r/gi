@@ -24,8 +24,6 @@ impl Loader {
     let mut outputs = Vec::<String>::new();
 
     for filename in files {
-      println!("loading {:?}", &filename);
-
       let path = &Path::new(&filename);
       let file = match File::open(path) {
         Ok(file) => file,

@@ -30,6 +30,14 @@ fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   box Node::Nil
 }
 
+fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, _) => println!("{}", lhs_token),
+    _ => println!("{}", args)
+  }
+  box Node::Nil
+}
+
 fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
     box Cons(ref lhs_token, ref tail) => {
@@ -65,7 +73,6 @@ impl Environment {
     match *token {
       box Cons(ref head, ref tail) => {
         let result = &self.eval(tail);
-        println!("Evaluating... {:?}", token);
         match *head {
           box Atom(ref value) => self.invoke_function(value, result),
           box Cons(_, _) => self.eval(head),
@@ -73,14 +80,12 @@ impl Environment {
         }
       },
       _ => {
-        println!("Evaluating... {:?}", token);
         token.clone()
       }
     }
   }
 
   fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
-    println!("Invoking {:?} with {:?}", name, args);
     match &name[..] {
       "first" => {
         let result = &first(self, args);
@@ -92,6 +97,10 @@ impl Environment {
       },
       "println" => {
         let result = &println(self, args);
+        self.eval(result)
+      },
+      "dumpln" => {
+        let result = &dumpln(self, args);
         self.eval(result)
       },
       "add" => {

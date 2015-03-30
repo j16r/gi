@@ -20,3 +20,15 @@ impl fmt::Debug for Node {
     }
   }
 }
+
+impl fmt::Display for Node {
+  fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+    match *self {
+      Node::Nil => write!(formatter, ""),
+      Node::Atom(ref token) => write!(formatter, "{}", token),
+      Node::Cons(ref first, ref rest) => write!(formatter, "{}, {}", first, rest),
+      Node::Integer32(ref val) => write!(formatter, "{}", val),
+      Node::U8String(ref val) => write!(formatter, "{}", val)
+    }
+  }
+}
