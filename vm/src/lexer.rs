@@ -63,9 +63,15 @@ impl<R: Reader> Lexer<R> {
     loop {
       match self.reader.read_char() {
         Ok(ch) if !ch.is_whitespace() && ch != ')' => token.push(ch),
-        Ok(_) => {
+        Ok(_) | Err(IoError { kind: EndOfFile, .. }) => {
           self.current_char = None;
-          return Ok(Some(box Token::Identifier(token)))
+          if token == "true" {
+            return Ok(Some(box Token::Bool(true)))
+          } else if token == "false" {
+            return Ok(Some(box Token::Bool(false)))
+          } else {
+            return Ok(Some(box Token::Identifier(token)))
+          }
         },
         Err(error) => return self.lexer_error(error.desc)
       }
@@ -171,6 +177,12 @@ fn test_parse_close_paren() {
 fn test_parse_int32() {
   assert_next_token!("3298", Ok(Some(box Token::Integer32(3298))));
   assert_next_token!("-42", Ok(Some(box Token::Integer32(-42))));
+}
+
+#[test]
+fn test_parse_bool() {
+  assert_next_token!("true", Ok(Some(box Token::Bool(true))));
+  assert_next_token!("false", Ok(Some(box Token::Bool(false))));
 }
 
 #[test]

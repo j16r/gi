@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use ast::Node;
-use ast::Node::{Nil, Atom, Cons, Integer32};
+use ast::Node::{Nil, Atom, Cons, Integer32, Bool};
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
@@ -94,6 +94,24 @@ fn mul(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   }
 }
 
+fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, ref tail) => {
+      match *lhs_token {
+        box Bool(expression) => {
+          if expression {
+            return env.eval(tail);
+          }
+        },
+        _ => panic!("first argument to cond must be an Bool")
+      }
+    },
+    _ => panic!("cond requires at least two arguments")
+  }
+
+  box Node::Nil
+}
+
 fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
     box Cons(ref lhs_token, ref tail) => {
@@ -173,6 +191,10 @@ impl Environment {
       },
       "div" => {
         let result = &div(self, args);
+        self.eval(result)
+      },
+      "cond" => {
+        let result = &cond(self, args);
         self.eval(result)
       },
       _ => {
