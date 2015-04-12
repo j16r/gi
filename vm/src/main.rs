@@ -1,9 +1,6 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
-#![feature(old_io)]
-#![feature(old_path)]
-#![feature(core)]
-#![feature(unicode)]
+#![feature(io)]
 
 use loader::Loader;
 

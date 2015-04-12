@@ -1,6 +1,6 @@
-use std::old_path::Path;
-use std::old_io::{File, BufferedReader, IoError};
-use std::error::FromError;
+use std::path::Path;
+use std::fs::File;
+use std::io::BufReader;
 
 use parser::{Parser, ParserError};
 use environment::Environment;
@@ -17,7 +17,7 @@ pub type LoaderResult = Result<Vec<String>, LoaderError>;
 
 impl Loader {
   pub fn new() -> Box<Loader> {
-    box Loader {environment: Environment::new()}
+    Box::new(Loader {environment: Environment::new()})
   }
 
   pub fn load(&mut self, files: &[String]) -> LoaderResult {
@@ -31,7 +31,7 @@ impl Loader {
             explanation: format!("Failed to open file {}", filename)})
       };
 
-      let reader = BufferedReader::new(file);
+      let reader = BufReader::new(file);
       let mut parser = Parser::new(reader);
       let ast = match parser.parse() {
         Ok(ast) => ast,

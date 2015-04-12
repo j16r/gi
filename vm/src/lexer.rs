@@ -1,13 +1,14 @@
 use std::fmt;
-use std::old_io::{Reader, Buffer, BufferedReader, IoResult, IoError, EndOfFile};
+use std::error::Error;
+use std::io::{self, Read, BufReader, Chars, CharsError};
 
 #[cfg(test)]
-use std::old_io::MemReader;
+use std::io::Cursor;
 
 use grammar::Token;
 
 pub struct Lexer<R> {
-  reader: BufferedReader<R>,
+  characters: Chars<BufReader<R>>,
   current_char: Option<char>,
   line_number: usize,
   column: usize
@@ -30,29 +31,35 @@ impl fmt::Display for LexerError {
   }
 }
 
-impl<R: Reader> Lexer<R> {
+impl<R: Read> Lexer<R> {
   pub fn new(reader: R) -> Lexer<R> {
+    let reader = BufReader::new(reader);
     Lexer {
-      reader: BufferedReader::new(reader),
+      characters: reader.chars(),
       current_char: None,
       line_number: 0,
       column: 0
     }
   }
 
-  fn consume_whitespace(&mut self) -> IoResult<char> {
+  fn read_char(&mut self) -> Option<Result<char, CharsError>> {
+    self.characters.next()
+  }
+
+  fn consume_whitespace(&mut self) -> Result<Option<char>, CharsError> {
     if self.current_char.is_some() {
-      return Ok(self.current_char.unwrap());
+      return Ok(self.current_char);
     }
 
     loop {
-      match self.reader.read_char() {
-        Ok(ch) if ch.is_whitespace() => (),
-        Ok(ch) => {
+      match self.read_char() {
+        Some(Ok(ch)) if ch.is_whitespace() => (),
+        Some(Ok(ch)) => {
           self.current_char = Some(ch);
-          return Ok(ch)
+          return Ok(Some(ch))
         },
-        Err(e) => return Err(e)
+        None => return Ok(None),
+        Some(Err(e)) => return Err(e)
       }
     }
   }
@@ -61,19 +68,19 @@ impl<R: Reader> Lexer<R> {
     let mut token = self.current_char.unwrap().to_string();
 
     loop {
-      match self.reader.read_char() {
-        Ok(ch) if !ch.is_whitespace() && ch != ')' => token.push(ch),
-        Ok(_) | Err(IoError { kind: EndOfFile, .. }) => {
+      match self.read_char() {
+        Some(Ok(ch)) if !ch.is_whitespace() && ch != ')' => token.push(ch),
+        Some(Ok(_)) | None => {
           self.current_char = None;
           if token == "true" {
-            return Ok(Some(box Token::Bool(true)))
+            return Ok(Some(Box::new(Token::Bool(true))))
           } else if token == "false" {
-            return Ok(Some(box Token::Bool(false)))
+            return Ok(Some(Box::new(Token::Bool(false))))
           } else {
-            return Ok(Some(box Token::Identifier(token)))
+            return Ok(Some(Box::new(Token::Identifier(token))))
           }
         },
-        Err(error) => return self.lexer_error(error.desc)
+        Some(Err(error)) => return self.lexer_error(error.description())
       }
     }
   }
@@ -82,13 +89,13 @@ impl<R: Reader> Lexer<R> {
     let mut token = self.current_char.unwrap().to_string();
 
     loop {
-      match self.reader.read_char() {
-        Ok(ch) if ch.is_digit(10) => token.push(ch),
-        Ok(_) | Err(IoError { kind: EndOfFile, .. }) => {
+      match self.read_char() {
+        Some(Ok(ch)) if ch.is_digit(10) => token.push(ch),
+        Some(Ok(_)) | None => {
           self.current_char = None;
-          return Ok(Some(box Token::Integer32(token.parse().unwrap())))
+          return Ok(Some(Box::new(Token::Integer32(token.parse().unwrap()))))
         },
-        Err(error) => return self.lexer_error(&error.to_string()[..])
+        Some(Err(error)) => return self.lexer_error(&error.to_string()[..])
       }
     }
   }
@@ -97,19 +104,22 @@ impl<R: Reader> Lexer<R> {
     let mut token = String::new();
 
     loop {
-      match self.reader.read_char() {
-        Ok('"') => {
+      match self.read_char() {
+        Some(Ok('"')) => {
           self.current_char = None;
-          return Ok(Some(box Token::U8String(token)))
+          return Ok(Some(Box::new(Token::U8String(token))))
         },
-        Ok('\\') => {
-          match self.reader.read_char() {
-            Ok(ch) => token.push(ch),
+        Some(Ok('\\')) => {
+          match self.read_char() {
+            Some(Ok(ch)) => token.push(ch),
             _ => panic!("Uh oh!")
           }
         },
-        Ok(ch) => token.push(ch),
-        Err(error) => return self.lexer_error(&error.to_string()[..])
+        Some(Ok(ch)) => token.push(ch),
+        None => {
+            return Ok(Some(Box::new(Token::U8String(token))))
+        },
+        Some(Err(error)) => return self.lexer_error(&error.to_string()[..])
       }
     }
   }
@@ -124,18 +134,18 @@ impl<R: Reader> Lexer<R> {
 
   pub fn next_token(&mut self) -> LexerResult {
     match self.consume_whitespace() {
-      Err(IoError { kind: EndOfFile, .. }) | Ok(_) => (),
+      Ok(_) => (),
       Err(error) => return self.lexer_error(&error.to_string()[..])
     }
 
     match self.current_char {
       Some('(') => {
         self.current_char = None;
-        Ok(Some(box Token::OpenParen))
+        Ok(Some(Box::new(Token::OpenParen)))
       },
       Some(')') => {
         self.current_char = None;
-        Ok(Some(box Token::CloseParen))
+        Ok(Some(Box::new(Token::CloseParen)))
       },
       Some(ch) if ch.is_digit(10) || ch == '-' => self.consume_i32(),
       Some('"') => self.consume_string_literal(),
@@ -147,7 +157,7 @@ impl<R: Reader> Lexer<R> {
 
 macro_rules! assert_next_token {
   ($input:expr, $expected:pat) => ({
-    let next_token = Lexer::new(MemReader::new($input.as_bytes().to_vec()))
+    let next_token = Lexer::new(Cursor::new($input.as_bytes()))
       .next_token();
 
     match next_token {
@@ -187,7 +197,7 @@ fn test_parse_bool() {
 
 #[test]
 fn test_parse_string_literal() {
-  let next_token = Lexer::new(MemReader::new("\"s\"".as_bytes().to_vec()))
+  let next_token = Lexer::new(Cursor::new("\"s\"".as_bytes()))
       .next_token();
 
   match next_token {
@@ -196,7 +206,7 @@ fn test_parse_string_literal() {
     Err(error) => panic!("Failed to parse \"s\", got token {}", error)
   }
 
-  let next_token = Lexer::new(MemReader::new("\"s \\\"s\\\"\"".as_bytes().to_vec()))
+  let next_token = Lexer::new(Cursor::new("\"s \\\"s\\\"\"".as_bytes()))
       .next_token();
 
   match next_token {

@@ -24,24 +24,24 @@ fn rest(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
-    box Cons(ref lhs_token, _) => println!("{:?}", lhs_token),
-    _ => println!("{:?}", args)
-  }
-  box Node::Nil
-}
-
-fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-  match *args {
     box Cons(ref lhs_token, _) => println!("{}", lhs_token),
     _ => println!("{}", args)
   }
   box Node::Nil
 }
 
+fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+  match *args {
+    box Cons(ref lhs_token, _) => println!("{:?}", lhs_token),
+    _ => println!("{:?}", args)
+  }
+  box Node::Nil
+}
+
 fn dump(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
   match *args {
-    box Cons(ref lhs_token, _) => print!("{}", lhs_token),
-    _ => print!("{}", args)
+    box Cons(ref lhs_token, _) => print!("{:?}", lhs_token),
+    _ => print!("{:?}", args)
   }
   box Node::Nil
 }

@@ -1,9 +1,8 @@
 use std::fmt;
-use std::old_io::Reader;
-use std::error::FromError;
+use std::io::Read;
 
 #[cfg(test)]
-use std::old_io::MemReader;
+use std::io::Cursor;
 
 use ast::Node;
 use grammar::Token;
@@ -19,8 +18,8 @@ pub struct ParserError {
   explanation: String
 }
 
-impl FromError<LexerError> for ParserError {
-    fn from_error(error: LexerError) -> Self {
+impl From<LexerError> for ParserError {
+    fn from(error: LexerError) -> Self {
         ParserError {
             line_number: error.line_number,
             column: error.column,
@@ -40,7 +39,7 @@ impl fmt::Debug for ParserError {
 
 type ParserResult = Result<Box<Node>, ParserError>;
 
-impl<R: Reader> Parser<R> {
+impl<R: Read> Parser<R> {
   pub fn new(reader: R) -> Parser<R> {
     Parser {
       lexer: Lexer::new(reader)
@@ -94,7 +93,7 @@ impl<R: Reader> Parser<R> {
 
 #[cfg(test)]
 fn assert_parse_tree(input: &str, output: &str) {
-  let ast = Parser::new(MemReader::new(input.as_bytes().to_vec()))
+  let ast = Parser::new(Cursor::new(input.as_bytes()))
     .parse();
   let formatted = format!("{:?}", ast.unwrap());
   assert_eq!(formatted, output.to_string());
