@@ -1,23 +1,12 @@
-use std::process::Command;
+mod support;
+use support::verify_output;
 
 #[test]
 fn cond_true() {
-    let stdout = Command::new("target/debug/gi_vm")
-        .args(&["run", "tests/cond_true.gi"])
-        .output()
-        .unwrap()
-        .stdout;
-
-    assert_eq!(String::from_utf8_lossy(&stdout), "\"statement\"");
+    verify_output("tests/cond_true.gi", "\"statement\"");
 }
 
 #[test]
 fn cond_false() {
-    let stdout = Command::new("target/debug/gi_vm")
-        .args(&["run", "tests/cond_false.gi"])
-        .output()
-        .unwrap()
-        .stdout;
-
-    assert_eq!(String::from_utf8_lossy(&stdout), "Nil");
+    verify_output("tests/cond_false.gi", "Nil");
 }

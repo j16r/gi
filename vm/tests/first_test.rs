@@ -1,12 +1,7 @@
-use std::process::Command;
+mod support;
+use support::verify_output;
 
 #[test]
 fn first() {
-    let stdout = Command::new("target/debug/gi_vm")
-        .args(&["run", "tests/first.gi"])
-        .output()
-        .unwrap()
-        .stdout;
-
-    assert_eq!(String::from_utf8_lossy(&stdout), "\"first\"");
+    verify_output("tests/first.gi", "\"first\"");
 }
