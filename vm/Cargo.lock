@@ -1,4 +1,11 @@
 [root]
 name = "gi_vm"
 version = "0.0.1"
+dependencies = [
+ "peg 0.2.3",
+]
+
+[[package]]
+name = "peg"
+version = "0.2.3"
 

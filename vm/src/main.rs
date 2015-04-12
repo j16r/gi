@@ -1,6 +1,12 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
-#![feature(io)]
+#![feature(convert)]
+
+#![feature(collections)]
+#![feature(str_char)]
+
+#![feature(plugin)]
+#![plugin(peg_syntax_ext)]
 
 use loader::Loader;
 
@@ -8,8 +14,6 @@ mod loader;
 mod parser;
 mod environment;
 mod ast;
-mod grammar;
-mod lexer;
 
 fn run(files: &[String]) {
     let mut loader = Loader::new();

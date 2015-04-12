@@ -1,92 +1,61 @@
 use std::fmt;
-use std::io::Read;
+use std::io::{self, Read};
 
 #[cfg(test)]
 use std::io::Cursor;
 
 use ast::Node;
-use grammar::Token;
-use lexer::{Lexer, LexerError};
 
 pub struct Parser<R> {
-    lexer: Lexer<R>
+    reader: R
 }
 
-pub struct ParserError {
-    line_number: usize,
-    column: usize,
-    explanation: String
+pub enum ParserError {
+    SyntaxError(grammar::ParseError),
+    IoError(io::Error)
 }
 
-impl From<LexerError> for ParserError {
-    fn from(error: LexerError) -> Self {
-        ParserError {
-            line_number: error.line_number,
-            column: error.column,
-            explanation: error.explanation
-        }
+type ParserResult = Result<Box<Node>, ParserError>;
+
+impl From<io::Error> for ParserError {
+    fn from(error: io::Error) -> Self {
+        ParserError::IoError(error)
+    }
+}
+
+impl From<grammar::ParseError> for ParserError {
+    fn from(error: grammar::ParseError) -> Self {
+        ParserError::SyntaxError(error)
     }
 }
 
 impl fmt::Debug for ParserError {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-        write!(formatter, "{}:{} {}",
-               self.line_number,
-               self.column,
-               self.explanation)
+        let output = match *self {
+            ParserError::SyntaxError(ref error) => {
+                format!("{}", error)
+            },
+            ParserError::IoError(ref error) => {
+                format!("{:?}", error)
+            }
+        };
+        formatter.write_str(&output)
     }
 }
 
-type ParserResult = Result<Box<Node>, ParserError>;
+peg_file! grammar("grammar.rustpeg");
 
 impl<R: Read> Parser<R> {
     pub fn new(reader: R) -> Parser<R> {
-        Parser {
-            lexer: Lexer::new(reader)
-        }
+        Parser {reader: reader}
     }
 
     pub fn parse(&mut self) -> ParserResult {
-        match try!(self.lexer.next_token()) {
-            Some(box Token::OpenParen) => {
-                self.parse_tail()
-            },
-            _ => Ok(box Node::Nil)
-        }
-    }
-
-    fn parse_tail(&mut self) -> ParserResult {
-        let token = try!(self.lexer.next_token());
-        match token {
-            Some(box Token::OpenParen) => {
-                let left = try!(self.parse_tail());
-                let right = try!(self.parse_tail());
-                Ok(box Node::Cons(left, right))
-            },
-            Some(box Token::CloseParen) => {
-                Ok(box Node::Nil)
-            },
-            Some(box Token::Bool(value)) => {
-                let left = box Node::Bool(value);
-                let right = try!(self.parse_tail());
-                Ok(box Node::Cons(left, right))
-            },
-            Some(box Token::Identifier(name)) => {
-                let left = box Node::Atom(name);
-                let right = try!(self.parse_tail());
-                Ok(box Node::Cons(left, right))
-            },
-            Some(box Token::Integer32(value)) => {
-                let left = box Node::Integer32(value);
-                let right = try!(self.parse_tail());
-                Ok(box Node::Cons(left, right))
-            },
-            Some(box Token::U8String(value)) => {
-                let left = box Node::U8String(value);
-                let right = try!(self.parse_tail());
-                Ok(box Node::Cons(left, right))
-            },
-            None => Ok(box Node::Nil)
+        let mut input = String::new();
+        try!(self.reader.read_to_string(&mut input));
+        match grammar::parse(&input) {
+            Ok(result) => Ok(result),
+            Err(error) => Err(ParserError::from(error))
         }
     }
 }

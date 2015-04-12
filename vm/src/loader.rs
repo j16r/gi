@@ -2,7 +2,7 @@ use std::path::Path;
 use std::fs::File;
 use std::io::BufReader;
 
-use parser::{Parser, ParserError};
+use parser::Parser;
 use environment::Environment;
 
 pub struct Loader {
@@ -28,7 +28,9 @@ impl Loader {
             let file = match File::open(path) {
                 Ok(file) => file,
                 Err(error) => return Err(LoaderError {
-                    explanation: format!("Failed to open file {}", filename)})
+                    explanation: format!("Failed to open file {}, reason {}",
+                                         filename,
+                                         error)})
             };
 
             let reader = BufReader::new(file);

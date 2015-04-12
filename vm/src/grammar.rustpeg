@@ -1,0 +1,51 @@
+use ast::Node;
+
+#[export]
+parse -> Box<Node>
+    = expression
+    / whitespace* { Box::new(Node::Nil) }
+
+expression -> Box<Node>
+    = list
+    / nil
+    / bool
+    / string
+    / integer
+    / atom
+
+list -> Box<Node>
+    = "()" { Box::new(Node::Nil) }
+    / _ "(" _ e:sexpression _ ")" _ { e }
+
+sexpression -> Box<Node>
+    = first:expression whitespace+ rest:sexpression {
+      Box::new(Node::Cons(first, rest))
+    }
+    / e:expression {
+      Box::new(Node::Cons(e, Box::new(Node::Nil)))
+    }
+
+nil -> Box<Node>
+    = "nil" { Box::new(Node::Nil) }
+
+bool -> Box<Node>
+    = "true" { Box::new(Node::Bool(true)) }
+    / "false" { Box::new(Node::Bool(false)) }
+
+string -> Box<Node>
+    = "\"" s:string_body "\"" { s }
+
+string_body -> Box<Node>
+    = [^"]* { Box::new(Node::U8String(match_str.to_string())) }
+
+integer -> Box<Node>
+    = [1-9][0-9]* { Box::new(Node::Integer32(match_str.parse().unwrap())) }
+
+atom -> Box<Node>
+    = [^) \t\r\n]+ { Box::new(Node::Atom(match_str.to_string())) }
+
+whitespace
+    = [ \t\r\n]
+
+_
+    = whitespace*
