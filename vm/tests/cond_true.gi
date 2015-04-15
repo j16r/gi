@@ -1,1 +1,0 @@
-(dump (cond true "statement"))

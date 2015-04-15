@@ -3,5 +3,5 @@ use support::verify_output;
 
 #[test]
 fn first() {
-    verify_output("tests/first.gi", "\"first\"");
+    verify_output(r#"(dump (first "first" "second" "third"))"#, r#""first""#);
 }

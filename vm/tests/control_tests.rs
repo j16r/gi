@@ -3,10 +3,10 @@ use support::verify_output;
 
 #[test]
 fn cond_true() {
-    verify_output("tests/cond_true.gi", "\"statement\"");
+    verify_output(r#"(dump (cond true "statement"))"#, "\"statement\"");
 }
 
 #[test]
 fn cond_false() {
-    verify_output("tests/cond_false.gi", "Nil");
+    verify_output(r#"(dump (cond false "statement"))"#, "Nil");
 }

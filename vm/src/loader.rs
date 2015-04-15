@@ -1,6 +1,6 @@
 use std::path::Path;
 use std::fs::File;
-use std::io::BufReader;
+use std::io::{BufReader, Read};
 
 use parser::Parser;
 use environment::Environment;
@@ -46,5 +46,17 @@ impl Loader {
         }
 
         Ok(outputs)
+    }
+
+    pub fn exec<R: Read>(&mut self, input: R) -> LoaderResult {
+        let mut parser = Parser::new(input);
+        let ast = match parser.parse() {
+            Ok(ast) => ast,
+            Err(error) => return Err(LoaderError {
+                explanation: format!("Parser error:\n{:?}", error)})
+        };
+
+        let result = self.environment.eval(&ast);
+        Ok(vec![format!("{:?}", result)])
     }
 }
