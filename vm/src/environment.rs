@@ -112,6 +112,30 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Nil
 }
 
+fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    match *args {
+        box Cons(ref lhs_token, ref tail) => {
+            match *lhs_token {
+                box Bool(ref lhs_value) => {
+                    match *tail {
+                        box Cons(ref rhs_token, _) => {
+                            match *rhs_token {
+                                box Bool(ref rhs_value) => {
+                                    return box Node::Bool(lhs_value == rhs_value);
+                                },
+                                _ => return box Node::Bool(false)
+                            }
+                        },
+                        _ => panic!("something went wrong")
+                    }
+                },
+                _ => panic!("equal only works on 1st arg bool right now")
+            }
+        },
+        _ => panic!("equal requires at least two arguments")
+    }
+}
+
 fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, ref tail) => {
@@ -195,6 +219,10 @@ impl Environment {
             },
             "cond" => {
                 let result = &cond(self, args);
+                self.eval(result)
+            },
+            "equal" => {
+                let result = &equal(self, args);
                 self.eval(result)
             },
             _ => {

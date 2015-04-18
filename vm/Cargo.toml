@@ -6,4 +6,3 @@ authors = ["John Barker <jebarker@gmail.com>"]
 
 [dependencies.peg]
 version = "*"
-path = "/Users/john/Projects/rust-peg"
