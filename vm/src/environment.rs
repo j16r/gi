@@ -112,7 +112,7 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Nil
 }
 
-fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn equal(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, ref tail) => {
             match *lhs_token {
