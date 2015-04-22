@@ -22,12 +22,16 @@ mod ast;
 
 fn run(files: &[String]) {
     let mut loader = Loader::new();
-    loader.load(files);
+    if let Err(error) = loader.load(files) {
+        println!("Failed to execute program on input: {}", error.explanation);
+    }
 }
 
-fn exec(input: String) {
+fn exec(input: &String) {
     let mut loader = Loader::new();
-    loader.exec(Cursor::new(input.as_bytes()));
+    if let Err(error) = loader.exec(Cursor::new(input.as_bytes())) {
+        println!("Failed to execute program on stdin: {}", error.explanation);
+    }
 }
 
 fn print_usage() {
@@ -47,8 +51,10 @@ fn main() {
 
     if !stdio_isatty() {
         let mut input = String::new();
-        std::io::stdin().read_to_string(&mut input);
-        return exec(input);
+        if let Err(error) = std::io::stdin().read_to_string(&mut input) {
+            println!("Failed to read stdin: {}", error);
+        }
+        return exec(&input);
     }
 
     if args.len() < 2 {
