@@ -1,6 +1,5 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
-#![feature(convert)]
 #![feature(libc)]
 
 #![feature(collections)]
