@@ -172,14 +172,16 @@ impl Environment {
             box Cons(ref head, ref tail) => {
                 let result = &self.eval(tail);
                 match *head {
-                    box Atom(ref value) => self.invoke_function(value, result),
-                    box Cons(_, _) => self.eval(head),
+                    box Atom(ref value) => {
+                        self.invoke_function(value, result)
+                    },
+                    box Cons(_, _) => {
+                        box Cons(self.eval(head), result.clone())
+                    },
                     _ => token.clone()
                 }
             },
-            _ => {
-                token.clone()
-            }
+            _ => token.clone()
         }
     }
 

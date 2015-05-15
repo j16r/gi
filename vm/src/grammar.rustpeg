@@ -2,20 +2,20 @@ use ast::Node;
 
 #[export]
 parse -> Box<Node>
-    = expression
+    = _ e:expression _ { e }
     / whitespace* { Box::new(Node::Nil) }
 
 expression -> Box<Node>
     = list
-    / nil
-    / bool
     / string
     / integer
+    / bool
+    / nil
     / atom
 
 list -> Box<Node>
-    = "()" { Box::new(Node::Nil) }
-    / _ "(" _ e:sexpression _ ")" _ { e }
+    = "(" e:sexpression ")" { e }
+    / "()" { Box::new(Node::Nil) }
 
 sexpression -> Box<Node>
     = first:expression whitespace+ rest:sexpression {
@@ -40,6 +40,7 @@ string_body -> Box<Node>
 
 integer -> Box<Node>
     = [1-9][0-9]* { Box::new(Node::Integer32(match_str.parse().unwrap())) }
+    / [0-9] { Box::new(Node::Integer32(match_str.parse().unwrap())) }
 
 atom -> Box<Node>
     = [^) \t\r\n]+ { Box::new(Node::Atom(match_str.to_string())) }

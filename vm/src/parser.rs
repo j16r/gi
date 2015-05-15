@@ -95,8 +95,22 @@ fn test_parse_string_literal() {
 }
 
 #[test]
+fn test_parse_integer() {
+    assert_parse_tree("1", "1_i32");
+    assert_parse_tree("10", "10_i32");
+    assert_parse_tree("0", "0_i32");
+}
+
+#[test]
 fn test_parse_nested_function() {
     assert_parse_tree(
         "(println (conj 1 2))",
         "Cons(:println, Cons(Cons(:conj, Cons(1_i32, Cons(2_i32, Nil))), Nil))");
+}
+
+#[test]
+fn test_value_after_function() {
+    assert_parse_tree(
+        "(println (add 1 2) 3)",
+        "Cons(:println, Cons(Cons(:add, Cons(1_i32, Cons(2_i32, Nil))), Cons(3_i32, Nil)))");
 }

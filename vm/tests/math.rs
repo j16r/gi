@@ -15,3 +15,8 @@ fn mul() {
 fn div() {
     verify_output("(dump (div 30 3))", "10_i32");
 }
+
+#[test]
+fn complex() {
+    verify_output("(dump (div (mul 8 7) 4))", "14_i32");
+}
