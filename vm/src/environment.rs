@@ -1,6 +1,6 @@
 use std::collections::HashMap;
-use ast::Node;
-use ast::Node::{Nil, Atom, Cons, Integer32, Bool};
+use ast::Node::{self, Nil, Atom, Cons};
+use ast::Value::{self, Integer32, Bool};
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 
@@ -8,18 +8,26 @@ pub struct Environment {
     functions: Box<HashMap<String, Box<Node>>>
 }
 
-fn first(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn first(args: &Box<Node>) -> Box<Node> {
     match *args {
-        box Cons(ref lhs_token, _) => box Cons(lhs_token.clone(), box Nil),
-        _ => panic!("WTF?")
+        box Cons(ref lhs_token, _) => lhs_token.clone(),
+        _ => panic!("Applied first to non Cons args {:?}", args)
     }
 }
 
-fn rest(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn first_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    first(args)
+}
+
+fn rest(args: &Box<Node>) -> Box<Node> {
     match *args {
-        box Cons(_, ref rhs_token) => box Cons(rhs_token.clone(), box Nil),
-        _ => panic!("WTF?")
+        box Cons(_, ref rhs_token) => rhs_token.clone(),
+        _ => panic!("Applied rest to non Cons args {:?}", args)
     }
+}
+
+fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    rest(args)
 }
 
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
@@ -46,118 +54,69 @@ fn dump(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Nil
 }
 
-fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    match *args {
-        box Cons(ref lhs_token, ref tail) => {
-            match *lhs_token {
-                box Integer32(ref lhs_value) => {
-                    match *tail {
-                        box Cons(ref rhs_token, _) => {
-                            match *rhs_token {
-                                box Integer32(ref rhs_value) => {
-                                    box Integer32(*lhs_value + *rhs_value)
-                                },
-                                _ => panic!("second argument to add must be an Atom")
-                            }
-                        },
-                        _ => panic!("add only takes two arguments, got more")
-                    }
-                },
-                _ => panic!("first argument to add must be an Atom")
-            }
-        },
-        _ => panic!("add requires two arguments")
+fn add(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = first(args);
+    let rhs = first(&rest(args));
+
+    if let box Node::Value(Integer32(ref lhs_value)) = lhs {
+        if let box Node::Value(Integer32(ref rhs_value)) = rhs {
+            return box Node::Value(Integer32(*lhs_value + *rhs_value))
+        }
     }
+    box Node::Nil
 }
 
-fn mul(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    match *args {
-        box Cons(ref lhs_token, ref tail) => {
-            match *lhs_token {
-                box Integer32(ref lhs_value) => {
-                    match *tail {
-                        box Cons(ref rhs_token, _) => {
-                            match *rhs_token {
-                                box Integer32(ref rhs_value) => {
-                                    box Integer32(*lhs_value * *rhs_value)
-                                },
-                                _ => panic!("second argument to mul must be an Atom")
-                            }
-                        },
-                        _ => panic!("mul only takes two arguments, got more")
-                    }
-                },
-                _ => panic!("first argument to mul must be an Atom")
-            }
-        },
-        _ => panic!("mul requires two arguments")
+fn mul(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = first(args);
+    let rhs = first(&rest(args));
+
+    if let box Node::Value(Integer32(ref lhs_value)) = lhs {
+        if let box Node::Value(Integer32(ref rhs_value)) = rhs {
+            return box Node::Value(Integer32(*lhs_value * *rhs_value))
+        }
     }
+    box Node::Nil
 }
 
 fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    match *args {
-        box Cons(ref lhs_token, ref tail) => {
-            match *lhs_token {
-                box Bool(expression) => {
-                    if expression {
-                        return env.eval(tail);
-                    }
-                },
-                _ => panic!("first argument to cond must be an Bool")
-            }
-        },
-        _ => panic!("cond requires at least two arguments")
+    if let box Node::Value(Value::Bool(expression)) = first(args) {
+        if expression {
+            return rest(args);
+        }
+    } else {
+        panic!("first argument to cond must be an Bool, got {:?}", args);
     }
 
     box Node::Nil
 }
 
-fn equal(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    match *args {
-        box Cons(ref lhs_token, ref tail) => {
-            match *lhs_token {
-                box Bool(ref lhs_value) => {
-                    match *tail {
-                        box Cons(ref rhs_token, _) => {
-                            match *rhs_token {
-                                box Bool(ref rhs_value) => {
-                                    return box Node::Bool(lhs_value == rhs_value);
-                                },
-                                _ => return box Node::Bool(false)
-                            }
-                        },
-                        _ => panic!("something went wrong")
-                    }
-                },
-                _ => panic!("equal only works on 1st arg bool right now")
-            }
-        },
-        _ => panic!("equal requires at least two arguments")
+fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = first(args);
+    let rhs = first(&rest(args));
+
+    if let box Node::Value(ref lhs_value) = lhs {
+        if let box Node::Value(ref rhs_value) = rhs {
+            return box Node::Value(Value::Bool(*lhs_value == *rhs_value))
+        } else {
+            panic!("RHS? {:?}", rhs);
+        }
+    } else {
+        panic!("LHS? {:?}", lhs);
     }
+
+    box Node::Value(Value::Bool(false))
 }
 
-fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    match *args {
-        box Cons(ref lhs_token, ref tail) => {
-            match *lhs_token {
-                box Integer32(ref lhs_value) => {
-                    match *tail {
-                        box Cons(ref rhs_token, _) => {
-                            match *rhs_token {
-                                box Integer32(ref rhs_value) => {
-                                    box Integer32(*lhs_value / *rhs_value)
-                                },
-                                _ => panic!("second argument to div must be an Atom")
-                            }
-                        },
-                        _ => panic!("div only takes two arguments, got more")
-                    }
-                },
-                _ => panic!("first argument to div must be an Atom")
-            }
-        },
-        _ => panic!("div requires two arguments")
+fn div(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = first(args);
+    let rhs = first(&rest(args));
+
+    if let box Node::Value(Integer32(ref lhs_value)) = lhs {
+        if let box Node::Value(Integer32(ref rhs_value)) = rhs {
+            return box Node::Value(Integer32(*lhs_value / *rhs_value))
+        }
     }
+    box Node::Nil
 }
 
 impl Environment {
@@ -175,10 +134,7 @@ impl Environment {
                     box Atom(ref value) => {
                         self.invoke_function(value, result)
                     },
-                    box Cons(_, _) => {
-                        box Cons(self.eval(head), result.clone())
-                    },
-                    _ => token.clone()
+                    _ => box Cons(self.eval(head), result.clone())
                 }
             },
             _ => token.clone()
@@ -188,11 +144,11 @@ impl Environment {
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
         match &name[..] {
             "first" => {
-                let result = &first(self, args);
+                let result = &first_fn(self, args);
                 self.eval(result)
             },
             "rest" => {
-                let result = &rest(self, args);
+                let result = &rest_fn(self, args);
                 self.eval(result)
             },
             "println" => {

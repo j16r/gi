@@ -2,9 +2,6 @@
 #![feature(box_patterns)]
 #![feature(libc)]
 
-#![feature(collections)]
-#![feature(str_char)]
-
 #![feature(plugin)]
 #![plugin(peg_syntax_ext)]
 
