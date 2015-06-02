@@ -186,7 +186,7 @@ impl Environment {
             _ => {
                 match self.functions.get(name).cloned() {
                     Some(function) => self.eval(&function),
-                    None => panic!("Tried to invoke function {:?} but there was none in scope", name)
+                    None => panic!("Tried to invoke function {} but there was none in scope", name)
                 }
             }
         }
