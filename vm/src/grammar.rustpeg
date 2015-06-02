@@ -11,7 +11,6 @@ expression -> Box<Node>
     / string
     / integer
     / bool
-    / nil
     / atom
 
 list -> Box<Node>
@@ -25,9 +24,6 @@ sexpression -> Box<Node>
     / e:expression {
       Box::new(Node::Cons(e, Box::new(Node::Nil)))
     }
-
-nil -> Box<Node>
-    = "nil" { Box::new(Node::Nil) }
 
 bool -> Box<Node>
     = "true" { Box::new(Node::Value(Value::Bool(true))) }
