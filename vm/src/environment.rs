@@ -143,46 +143,16 @@ impl Environment {
 
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
         match &name[..] {
-            "first" => {
-                let result = &first_fn(self, args);
-                self.eval(result)
-            },
-            "rest" => {
-                let result = &rest_fn(self, args);
-                self.eval(result)
-            },
-            "println" => {
-                let result = &println(self, args);
-                self.eval(result)
-            },
-            "dumpln" => {
-                let result = &dumpln(self, args);
-                self.eval(result)
-            },
-            "dump" => {
-                let result = &dump(self, args);
-                self.eval(result)
-            },
-            "add" => {
-                let result = &add(self, args);
-                self.eval(result)
-            },
-            "mul" => {
-                let result = &mul(self, args);
-                self.eval(result)
-            },
-            "div" => {
-                let result = &div(self, args);
-                self.eval(result)
-            },
-            "cond" => {
-                let result = &cond(self, args);
-                self.eval(result)
-            },
-            "equal" => {
-                let result = &equal(self, args);
-                self.eval(result)
-            },
+            "first" => first_fn(self, args),
+            "rest" => rest_fn(self, args),
+            "println" => println(self, args),
+            "dumpln" => dumpln(self, args),
+            "dump" => dump(self, args),
+            "add" => add(self, args),
+            "mul" => mul(self, args),
+            "div" => div(self, args),
+            "cond" => cond(self, args),
+            "equal" => equal(self, args),
             _ => {
                 match self.functions.get(name).cloned() {
                     Some(function) => self.eval(&function),
