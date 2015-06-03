@@ -33,10 +33,11 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     rest(args)
 }
 
-fn cond(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    if let box Node::Value(Value::Bool(expression)) = first(args) {
+fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    if let box Node::Value(Value::Bool(expression)) 
+            = env.eval(&first(args)) {
         if expression {
-            return rest(args);
+            return env.eval(&rest(args));
         }
     } else {
         panic!("first argument to cond must be an Bool, got {:?}", args);
@@ -62,6 +63,10 @@ fn equal(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Value(Value::Bool(false))
 }
 
+fn quote(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    first(args)
+}
+
 impl Environment {
     pub fn new() -> Box<Environment> {
         let mut functions = FunctionTable::new();
@@ -75,12 +80,13 @@ impl Environment {
     pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
         match *token {
             box Cons(ref head, ref tail) => {
-                let result = &self.eval(tail);
                 match *head {
-                    box Atom(ref value) => {
-                        self.invoke_function(value, result)
-                    },
-                    _ => box Cons(self.eval(head), result.clone())
+                    box Atom(ref value) =>
+                        self.invoke_function(value, tail),
+                    _ => {
+                        let result = &self.eval(tail);
+                        box Cons(self.eval(head), result.clone())
+                    }
                 }
             },
             _ => token.clone()
@@ -93,12 +99,14 @@ impl Environment {
             "rest" => rest_fn(self, args),
             "cond" => cond(self, args),
             "equal" => equal(self, args),
+            "quote" => quote(self, args),
             _ => {
                 let function = match self.functions.get(name) {
                     Some(function) => function.clone(),
                     None => panic!("Tried to invoke function {} but there was none in scope", name)
                 };
-                function(self, args)
+                let result = &self.eval(args);
+                function(self, result)
             }
         }
     }
