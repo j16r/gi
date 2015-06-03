@@ -16,6 +16,7 @@ mod loader;
 mod parser;
 mod environment;
 mod ast;
+mod lib;
 
 fn run(files: &[String]) {
     let mut loader = Loader::new();
