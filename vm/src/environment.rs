@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use ast::Node::{self, Nil, Atom, Cons};
-use ast::Value::{self, Integer32, Bool};
+use ast::Value::{self, Bool};
 
 use lib;
 
@@ -33,7 +33,7 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     rest(args)
 }
 
-fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn cond(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     if let box Node::Value(Value::Bool(expression)) = first(args) {
         if expression {
             return rest(args);
@@ -45,7 +45,7 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Nil
 }
 
-fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn equal(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = first(args);
     let rhs = first(&rest(args));
 
