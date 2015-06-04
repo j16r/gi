@@ -7,7 +7,7 @@ pub enum Value {
     U8String(String)
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq)]
 pub enum Node {
     Nil,
     Atom(String),

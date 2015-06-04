@@ -46,24 +46,14 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Nil
 }
 
-fn equal(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    let lhs = first(args);
-    let rhs = first(&rest(args));
+fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = env.eval(&first(args));
+    let rhs = env.eval(&first(&rest(args)));
 
-    if let box Node::Value(ref lhs_value) = lhs {
-        if let box Node::Value(ref rhs_value) = rhs {
-            return box Node::Value(Value::Bool(*lhs_value == *rhs_value))
-        } else {
-            panic!("RHS? {:?}", rhs);
-        }
-    } else {
-        panic!("LHS? {:?}", lhs);
-    }
-
-    box Node::Value(Value::Bool(false))
+    box Node::Value(Value::Bool(*lhs == *rhs))
 }
 
-fn quote(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+fn quote(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     first(args)
 }
 
