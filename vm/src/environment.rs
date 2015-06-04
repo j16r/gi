@@ -65,6 +65,13 @@ fn atom(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Node::Value(Value::Bool(result))
 }
 
+fn cons(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = env.eval(&first(args));
+    let rhs = env.eval(&rest(args));
+
+    box Cons(lhs, rhs)
+}
+
 impl Environment {
     pub fn new() -> Box<Environment> {
         let mut functions = FunctionTable::new();
@@ -99,6 +106,7 @@ impl Environment {
             "equal" => equal(self, args),
             "quote" => quote(self, args),
             "atom" => atom(self, args),
+            "cons" => cons(self, args),
             _ => {
                 let function = match self.functions.get(name) {
                     Some(function) => function.clone(),
