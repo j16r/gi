@@ -1,7 +1,7 @@
 use std::collections::HashMap;
+
 use ast::Node::{self, Nil, Atom, Cons};
 use ast::Value::{self, Bool};
-
 use lib;
 
 type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
@@ -57,6 +57,14 @@ fn quote(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     first(args)
 }
 
+fn atom(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let result = match first(args) {
+        box Node::Value(_) => true,
+        _ => false
+    };
+    box Node::Value(Value::Bool(result))
+}
+
 impl Environment {
     pub fn new() -> Box<Environment> {
         let mut functions = FunctionTable::new();
@@ -90,6 +98,7 @@ impl Environment {
             "cond" => cond(self, args),
             "equal" => equal(self, args),
             "quote" => quote(self, args),
+            "atom" => atom(self, args),
             _ => {
                 let function = match self.functions.get(name) {
                     Some(function) => function.clone(),
