@@ -1,9 +1,7 @@
-use std::collections::HashMap;
-
 use ast::Node::{self, Nil, Atom, Cons};
 use ast::Value::{self, Bool};
+use functions::{reserved, custom, FunctionTable, FunctionBody};
 use lib;
-use functions::{reserved, FunctionTable, FunctionBody};
 
 pub struct Environment {
     functions: FunctionTable
@@ -70,6 +68,18 @@ fn cons(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Cons(lhs, rhs)
 }
 
+fn def(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = env.eval(&first(args));
+    let body = env.eval(&rest(args)).clone();
+
+    if let box Node::Atom(ref name) = lhs {
+        env.functions.insert(name.clone(), custom(body.clone()));
+    } else {
+        panic!("Expecting name to be a String, got {:?}", lhs);
+    }
+    body
+}
+
 fn register(functions: &mut FunctionTable) {
     functions.insert("first".into(), reserved(first_fn));
     functions.insert("rest".into(), reserved(rest_fn));
@@ -99,8 +109,9 @@ impl Environment {
                     box Atom(ref value) =>
                         self.invoke_function(value, tail),
                     _ => {
-                        let result = &self.eval(tail);
-                        box Cons(self.eval(head), result.clone())
+                        let head_result = self.eval(head);
+                        let tail_result = self.eval(tail);
+                        box Cons(head_result, tail_result)
                     }
                 }
             },
@@ -118,7 +129,6 @@ impl Environment {
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
         match self.function(name) {
             FunctionBody::Reserved(ref body) => {
-                let function = body.clone();
                 body(self, args)
             },
             FunctionBody::Default(ref body) => {

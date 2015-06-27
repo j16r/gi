@@ -3,7 +3,8 @@ use ast::Value;
 
 #[export]
 parse -> Box<Node>
-    = _ e:expression _ { e }
+    = _ first:expression _ rest:expression _ { Box::new(Node::Cons(first, rest)) }
+    / _ e:expression _ { e }
     / whitespace* { Box::new(Node::Nil) }
 
 expression -> Box<Node>

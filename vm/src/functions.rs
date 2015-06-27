@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use environment::Environment;
-use ast::Node::{self, Nil, Atom, Cons};
+use ast::Node;
 
 pub type InternalFunctionBody = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 

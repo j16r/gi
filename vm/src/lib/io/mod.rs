@@ -1,6 +1,6 @@
 use ast::Node::{self, Nil, Cons};
 use environment::Environment;
-use functions::{FunctionTable, FunctionBody, default};
+use functions::{FunctionTable, default};
 
 pub fn register(functions: &mut FunctionTable) {
     functions.insert("println".into(), default(println));

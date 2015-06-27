@@ -1,7 +1,7 @@
 use ast::Node::{self, Nil};
 use ast::Value::Integer32;
 use environment::{Environment, first, rest};
-use functions::{default, FunctionTable, FunctionBody};
+use functions::{default, FunctionTable};
 
 pub fn register(functions: &mut FunctionTable) {
     functions.insert("add".into(), default(add));
