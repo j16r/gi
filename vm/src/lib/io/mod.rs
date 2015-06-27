@@ -1,10 +1,11 @@
 use ast::Node::{self, Nil, Cons};
-use environment::{FunctionTable, Environment};
+use environment::Environment;
+use functions::{FunctionTable, FunctionBody, default};
 
 pub fn register(functions: &mut FunctionTable) {
-    functions.insert("println".into(), println);
-    functions.insert("dump".into(), dump);
-    functions.insert("dumpln".into(), dumpln);
+    functions.insert("println".into(), default(println));
+    functions.insert("dump".into(), default(dump));
+    functions.insert("dumpln".into(), default(dumpln));
 }
 
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {

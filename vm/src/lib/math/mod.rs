@@ -1,12 +1,12 @@
 use ast::Node::{self, Nil};
 use ast::Value::Integer32;
-
-use environment::{FunctionTable, Environment, first, rest};
+use environment::{Environment, first, rest};
+use functions::{default, FunctionTable, FunctionBody};
 
 pub fn register(functions: &mut FunctionTable) {
-    functions.insert("add".into(), add);
-    functions.insert("mul".into(), mul);
-    functions.insert("div".into(), div);
+    functions.insert("add".into(), default(add));
+    functions.insert("mul".into(), default(mul));
+    functions.insert("div".into(), default(div));
 }
 
 fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {

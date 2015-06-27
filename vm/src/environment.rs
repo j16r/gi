@@ -3,9 +3,7 @@ use std::collections::HashMap;
 use ast::Node::{self, Nil, Atom, Cons};
 use ast::Value::{self, Bool};
 use lib;
-
-type Builtin = fn (&mut Environment, &Box<Node>) -> Box<Node>;
-pub type FunctionTable = HashMap<String, Builtin>;
+use functions::{reserved, FunctionTable, FunctionBody};
 
 pub struct Environment {
     functions: FunctionTable
@@ -72,10 +70,22 @@ fn cons(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     box Cons(lhs, rhs)
 }
 
+fn register(functions: &mut FunctionTable) {
+    functions.insert("first".into(), reserved(first_fn));
+    functions.insert("rest".into(), reserved(rest_fn));
+    functions.insert("cond".into(), reserved(cond));
+    functions.insert("equal".into(), reserved(equal));
+    functions.insert("quote".into(), reserved(quote));
+    functions.insert("atom".into(), reserved(atom));
+    functions.insert("cons".into(), reserved(cons));
+    functions.insert("def".into(), reserved(def));
+}
+
 impl Environment {
     pub fn new() -> Box<Environment> {
         let mut functions = FunctionTable::new();
 
+        register(&mut functions);
         lib::io::register(&mut functions);
         lib::math::register(&mut functions);
 
@@ -98,22 +108,29 @@ impl Environment {
         }
     }
 
+    fn function(&self, name: &String) -> FunctionBody {
+        self.functions
+            .get(name)
+            .unwrap_or_else(|| panic!("Tried to invoke function {} but there was none in scope", name))
+            .clone()
+    }
+
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
-        match &name[..] {
-            "first" => first_fn(self, args),
-            "rest" => rest_fn(self, args),
-            "cond" => cond(self, args),
-            "equal" => equal(self, args),
-            "quote" => quote(self, args),
-            "atom" => atom(self, args),
-            "cons" => cons(self, args),
-            _ => {
-                let function = match self.functions.get(name) {
-                    Some(function) => function.clone(),
-                    None => panic!("Tried to invoke function {} but there was none in scope", name)
-                };
+        match self.function(name) {
+            FunctionBody::Reserved(ref body) => {
+                let function = body.clone();
+                body(self, args)
+            },
+            FunctionBody::Default(ref body) => {
                 let result = &self.eval(args);
-                function(self, result)
+                body(self, result)
+            },
+            FunctionBody::Custom(ref body) => {
+                let result = &self.eval(args);
+                let function = box Node::Cons(
+                    body.clone(), 
+                    result.clone());
+                self.eval(&function)
             }
         }
     }
