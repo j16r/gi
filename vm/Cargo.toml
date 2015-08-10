@@ -6,4 +6,4 @@ authors = ["John Barker <jebarker@gmail.com>"]
 
 [dependencies.peg]
 
-git = "https://github.com/kevinmehall/rust-peg"
+version = "*"

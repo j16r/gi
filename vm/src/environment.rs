@@ -1,4 +1,4 @@
-use ast::Node::{self, Nil, Atom, Cons};
+use ast::Node::{self, Nil, Atom, Cons, Lambda};
 use ast::Value::{self, Bool};
 use functions::{reserved, custom, FunctionTable, FunctionBody};
 use lib;
@@ -30,7 +30,7 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 }
 
 fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    if let box Node::Value(Value::Bool(expression)) 
+    if let box Node::Value(Value::Bool(expression))
             = env.eval(&first(args)) {
         if expression {
             return env.eval(&rest(args));
@@ -70,7 +70,7 @@ fn cons(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
 fn def(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = env.eval(&first(args));
-    let body = env.eval(&rest(args)).clone();
+    let body = env.eval(&rest(args));
 
     if let box Node::Atom(ref name) = lhs {
         env.functions.insert(name.clone(), custom(body.clone()));
@@ -80,32 +80,47 @@ fn def(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     body
 }
 
-fn register(functions: &mut FunctionTable) {
-    functions.insert("first".into(), reserved(first_fn));
-    functions.insert("rest".into(), reserved(rest_fn));
-    functions.insert("cond".into(), reserved(cond));
-    functions.insert("equal".into(), reserved(equal));
-    functions.insert("quote".into(), reserved(quote));
-    functions.insert("atom".into(), reserved(atom));
-    functions.insert("cons".into(), reserved(cons));
-    functions.insert("def".into(), reserved(def));
+fn lambda(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    let lhs = first(args);
+    let body = rest(args);
+    box Node::Lambda(lhs, body)
+}
+
+fn register(env: &mut Environment) {
+    env.register("first".into(), reserved(first_fn));
+    env.register("rest".into(), reserved(rest_fn));
+    env.register("cond".into(), reserved(cond));
+    env.register("equal".into(), reserved(equal));
+    env.register("quote".into(), reserved(quote));
+    env.register("atom".into(), reserved(atom));
+    env.register("cons".into(), reserved(cons));
+    env.register("def".into(), reserved(def));
 }
 
 impl Environment {
     pub fn new() -> Box<Environment> {
-        let mut functions = FunctionTable::new();
+        let mut environment = Environment {functions: FunctionTable::new()};
 
-        register(&mut functions);
-        lib::io::register(&mut functions);
-        lib::math::register(&mut functions);
+        register(&mut environment);
+        lib::io::register(&mut environment);
+        lib::math::register(&mut environment);
 
-        box Environment {functions: functions}
+        box environment
+    }
+
+    pub fn register(&mut self, name: String, function: FunctionBody) {
+        self.functions.insert(name, function);
     }
 
     pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
         match *token {
             box Cons(ref head, ref tail) => {
                 match *head {
+                    box Cons(box Lambda(ref args, ref body), _) => {
+                        self.invoke_lambda(args, body, tail)
+                    },
+                    box Atom(ref value) if value == "lambda" =>
+                        lambda(self, tail),
                     box Atom(ref value) =>
                         self.invoke_function(value, tail),
                     _ => {
@@ -117,6 +132,28 @@ impl Environment {
             },
             _ => token.clone()
         }
+    }
+
+    fn register_arg(&mut self, args: &Box<Node>, params: &Box<Node>) {
+        let arg = match first(args) {
+            box Atom(name) => name,
+            _ => panic!("Argument definition is not an identifier")
+        };
+        let param = &first(params);
+        self.register(arg, custom(param.clone()));
+
+        match rest(params) {
+            box Nil => return,
+            _ => self.register_arg(&rest(args), &rest(param)),
+        };
+    }
+    
+    fn invoke_lambda(&mut self,
+                     args: &Box<Node>,
+                     body: &Box<Node>,
+                     params: &Box<Node>) -> Box<Node> {
+        self.register_arg(args, params);
+        self.eval(body)
     }
 
     fn function(&self, name: &String) -> FunctionBody {

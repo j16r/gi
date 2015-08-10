@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::rc::Rc;
 
 use environment::Environment;
@@ -25,4 +26,17 @@ pub fn default(body: InternalFunctionBody) -> FunctionBody {
 
 pub fn custom(body: Box<Node>) -> FunctionBody {
     FunctionBody::Custom(body)
+}
+
+impl fmt::Debug for FunctionBody {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            FunctionBody::Reserved(_) =>
+                write!(formatter, "fn(reserved)"),
+            FunctionBody::Default(_) =>
+                write!(formatter, "fn(default)"),
+            FunctionBody::Custom(_) =>
+                write!(formatter, "fn")
+        }
+    }
 }
