@@ -11,7 +11,7 @@ pub fn register(env: &mut Environment) {
 fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, _) => println!("{}", lhs_token),
-        _ => println!("{}", args)
+        _ => println!("{}", args),
     }
     box Node::Nil
 }
@@ -19,7 +19,7 @@ fn println(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, _) => println!("{:?}", lhs_token),
-        _ => println!("{:?}", args)
+        _ => println!("{:?}", args),
     }
     box Node::Nil
 }
@@ -27,7 +27,7 @@ fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 fn dump(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, _) => print!("{:?}", lhs_token),
-        _ => print!("{:?}", args)
+        _ => print!("{:?}", args),
     }
     box Node::Nil
 }

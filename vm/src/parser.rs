@@ -7,12 +7,12 @@ use std::io::Cursor;
 use ast::Node;
 
 pub struct Parser<R> {
-    reader: R
+    reader: R,
 }
 
 pub enum ParserError {
     SyntaxError(grammar::ParseError),
-    IoError(io::Error)
+    IoError(io::Error),
 }
 
 type ParserResult = Result<Box<Node>, ParserError>;
@@ -34,7 +34,7 @@ impl fmt::Debug for ParserError {
         let output = match *self {
             ParserError::SyntaxError(ref error) => {
                 format!("{}", error)
-            },
+            }
             ParserError::IoError(ref error) => {
                 format!("{:?}", error)
             }
@@ -47,7 +47,7 @@ peg_file! grammar("grammar.rustpeg");
 
 impl<R: Read> Parser<R> {
     pub fn new(reader: R) -> Parser<R> {
-        Parser {reader: reader}
+        Parser { reader: reader }
     }
 
     pub fn parse(&mut self) -> ParserResult {
@@ -55,15 +55,14 @@ impl<R: Read> Parser<R> {
         try!(self.reader.read_to_string(&mut input));
         match grammar::parse(&input) {
             Ok(result) => Ok(result),
-            Err(error) => Err(ParserError::from(error))
+            Err(error) => Err(ParserError::from(error)),
         }
     }
 }
 
 #[cfg(test)]
 fn assert_parse_tree(input: &str, output: &str) {
-    let ast = Parser::new(Cursor::new(input.as_bytes()))
-        .parse();
+    let ast = Parser::new(Cursor::new(input.as_bytes())).parse();
     let formatted = format!("{:?}", ast.unwrap());
     assert_eq!(formatted, output.to_string());
 }
@@ -91,7 +90,8 @@ fn test_parse_function() {
 
 #[test]
 fn test_parse_string_literal() {
-    assert_parse_tree("(println \"string\")", "Cons(:println, Cons(\"string\", Nil))");
+    assert_parse_tree("(println \"string\")",
+                      "Cons(:println, Cons(\"string\", Nil))");
 }
 
 #[test]
@@ -103,14 +103,13 @@ fn test_parse_integer() {
 
 #[test]
 fn test_parse_nested_function() {
-    assert_parse_tree(
-        "(println (conj 1 2))",
-        "Cons(:println, Cons(Cons(:conj, Cons(1_i32, Cons(2_i32, Nil))), Nil))");
+    assert_parse_tree("(println (conj 1 2))",
+                      "Cons(:println, Cons(Cons(:conj, Cons(1_i32, Cons(2_i32, Nil))), Nil))");
 }
 
 #[test]
 fn test_value_after_function() {
-    assert_parse_tree(
-        "(println (add 1 2) 3)",
-        "Cons(:println, Cons(Cons(:add, Cons(1_i32, Cons(2_i32, Nil))), Cons(3_i32, Nil)))");
+    assert_parse_tree("(println (add 1 2) 3)",
+                      "Cons(:println, Cons(Cons(:add, Cons(1_i32, Cons(2_i32, Nil))), \
+                       Cons(3_i32, Nil)))");
 }

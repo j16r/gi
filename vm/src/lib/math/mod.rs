@@ -15,7 +15,7 @@ fn div(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
     if let box Node::Value(Integer32(ref lhs_value)) = lhs {
         if let box Node::Value(Integer32(ref rhs_value)) = rhs {
-            return box Node::Value(Integer32(*lhs_value / *rhs_value))
+            return box Node::Value(Integer32(*lhs_value / *rhs_value));
         }
     }
     box Node::Nil
@@ -27,7 +27,7 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
     if let box Node::Value(Integer32(ref lhs_value)) = lhs {
         if let box Node::Value(Integer32(ref rhs_value)) = rhs {
-            return box Node::Value(Integer32(*lhs_value + *rhs_value))
+            return box Node::Value(Integer32(*lhs_value + *rhs_value));
         }
     }
     box Node::Nil
@@ -39,7 +39,7 @@ fn mul(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
     if let box Node::Value(Integer32(ref lhs_value)) = lhs {
         if let box Node::Value(Integer32(ref rhs_value)) = rhs {
-            return box Node::Value(Integer32(*lhs_value * *rhs_value))
+            return box Node::Value(Integer32(*lhs_value * *rhs_value));
         }
     }
     box Node::Nil

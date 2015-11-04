@@ -34,10 +34,8 @@ fn exec(input: &String) {
 }
 
 fn print_usage() {
-    print!("gi is the frontend for the gi language and framework\n\
-          usage: gi <command> ...\n\
-          \n\
-          \trun <filename>\tRun some gi source code\n");
+    print!("gi is the frontend for the gi language and framework\nusage: gi <command> \
+            ...\n\n\trun <filename>\tRun some gi source code\n");
 }
 
 #[cfg(unix)]
@@ -60,8 +58,8 @@ fn main() {
         print_usage()
     } else {
         match &args[1][..] {
-            "run" => run(&args[2 .. args.len()]),
-            _     => print_usage(),
+            "run" => run(&args[2..args.len()]),
+            _ => print_usage(),
         }
     }
 }

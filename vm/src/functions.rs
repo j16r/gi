@@ -11,7 +11,7 @@ pub type InternalFunctionBody = fn (&mut Environment, &Box<Node>) -> Box<Node>;
 pub enum FunctionBody {
     Reserved(Rc<InternalFunctionBody>),
     Default(Rc<InternalFunctionBody>),
-    Custom(Box<Node>)
+    Custom(Box<Node>),
 }
 
 pub type FunctionTable = HashMap<String, FunctionBody>;
@@ -31,12 +31,9 @@ pub fn custom(body: Box<Node>) -> FunctionBody {
 impl fmt::Debug for FunctionBody {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         match *self {
-            FunctionBody::Reserved(_) =>
-                write!(formatter, "fn(reserved)"),
-            FunctionBody::Default(_) =>
-                write!(formatter, "fn(default)"),
-            FunctionBody::Custom(_) =>
-                write!(formatter, "fn")
+            FunctionBody::Reserved(_) => write!(formatter, "fn(reserved)"),
+            FunctionBody::Default(_) => write!(formatter, "fn(default)"),
+            FunctionBody::Custom(_) => write!(formatter, "fn"),
         }
     }
 }

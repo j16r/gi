@@ -4,13 +4,13 @@ use functions::{reserved, custom, FunctionTable, FunctionBody};
 use lib;
 
 pub struct Environment {
-    functions: FunctionTable
+    functions: FunctionTable,
 }
 
 pub fn first(args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(ref lhs_token, _) => lhs_token.clone(),
-        _ => panic!("Applied first to non Cons args {:?}", args)
+        _ => panic!("Applied first to non Cons args {:?}", args),
     }
 }
 
@@ -21,7 +21,7 @@ fn first_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 pub fn rest(args: &Box<Node>) -> Box<Node> {
     match *args {
         box Cons(_, ref rhs_token) => rhs_token.clone(),
-        _ => panic!("Applied rest to non Cons args {:?}", args)
+        _ => panic!("Applied rest to non Cons args {:?}", args),
     }
 }
 
@@ -30,8 +30,7 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 }
 
 fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    if let box Node::Value(Value::Bool(expression))
-            = env.eval(&first(args)) {
+    if let box Node::Value(Value::Bool(expression)) = env.eval(&first(args)) {
         if expression {
             return env.eval(&rest(args));
         }
@@ -56,7 +55,7 @@ fn quote(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 fn atom(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let result = match first(args) {
         box Node::Value(_) => true,
-        _ => false
+        _ => false,
     };
     box Node::Value(Value::Bool(result))
 }
@@ -99,7 +98,7 @@ fn register(env: &mut Environment) {
 
 impl Environment {
     pub fn new() -> Box<Environment> {
-        let mut environment = Environment {functions: FunctionTable::new()};
+        let mut environment = Environment { functions: FunctionTable::new() };
 
         register(&mut environment);
         lib::io::register(&mut environment);
@@ -118,26 +117,24 @@ impl Environment {
                 match *head {
                     box Cons(box Lambda(ref args, ref body), _) => {
                         self.invoke_lambda(args, body, tail)
-                    },
-                    box Atom(ref value) if value == "lambda" =>
-                        lambda(self, tail),
-                    box Atom(ref value) =>
-                        self.invoke_function(value, tail),
+                    }
+                    box Atom(ref value) if value == "lambda" => lambda(self, tail),
+                    box Atom(ref value) => self.invoke_function(value, tail),
                     _ => {
                         let head_result = self.eval(head);
                         let tail_result = self.eval(tail);
                         box Cons(head_result, tail_result)
                     }
                 }
-            },
-            _ => token.clone()
+            }
+            _ => token.clone(),
         }
     }
 
     fn register_arg(&mut self, args: &Box<Node>, params: &Box<Node>) {
         let arg = match first(args) {
             box Atom(name) => name,
-            _ => panic!("Argument definition is not an identifier")
+            _ => panic!("Argument definition is not an identifier"),
         };
         let param = &first(params);
         self.register(arg, custom(param.clone()));
@@ -145,13 +142,14 @@ impl Environment {
         match rest(params) {
             box Nil => return,
             _ => self.register_arg(&rest(args), &rest(param)),
-        };
+        }
     }
-    
+
     fn invoke_lambda(&mut self,
                      args: &Box<Node>,
                      body: &Box<Node>,
-                     params: &Box<Node>) -> Box<Node> {
+                     params: &Box<Node>)
+                     -> Box<Node> {
         self.register_arg(args, params);
         self.eval(body)
     }
@@ -159,7 +157,10 @@ impl Environment {
     fn function(&self, name: &String) -> FunctionBody {
         self.functions
             .get(name)
-            .unwrap_or_else(|| panic!("Tried to invoke function {} but there was none in scope", name))
+            .unwrap_or_else(|| {
+                panic!("Tried to invoke function {} but there was none in scope",
+                       name)
+            })
             .clone()
     }
 
@@ -167,16 +168,14 @@ impl Environment {
         match self.function(name) {
             FunctionBody::Reserved(ref body) => {
                 body(self, args)
-            },
+            }
             FunctionBody::Default(ref body) => {
                 let result = &self.eval(args);
                 body(self, result)
-            },
+            }
             FunctionBody::Custom(ref body) => {
                 let result = &self.eval(args);
-                let function = box Node::Cons(
-                    body.clone(), 
-                    result.clone());
+                let function = box Node::Cons(body.clone(), result.clone());
                 self.eval(&function)
             }
         }
