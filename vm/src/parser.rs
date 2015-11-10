@@ -79,19 +79,19 @@ fn test_parse_empty_list() {
 
 #[test]
 fn test_bool() {
-    assert_parse_tree("(true)", "Cons(true, Nil)");
-    assert_parse_tree("(false)", "Cons(false, Nil)");
+    assert_parse_tree("(true)", "(true, Nil)");
+    assert_parse_tree("(false)", "(false, Nil)");
 }
 
 #[test]
 fn test_parse_function() {
-    assert_parse_tree("(abort)", "Cons(:abort, Nil)");
+    assert_parse_tree("(abort)", "(:abort, Nil)");
 }
 
 #[test]
 fn test_parse_string_literal() {
     assert_parse_tree("(println \"string\")",
-                      "Cons(:println, Cons(\"string\", Nil))");
+                      "(:println, (\"string\", Nil))");
 }
 
 #[test]
@@ -104,12 +104,12 @@ fn test_parse_integer() {
 #[test]
 fn test_parse_nested_function() {
     assert_parse_tree("(println (conj 1 2))",
-                      "Cons(:println, Cons(Cons(:conj, Cons(1_i32, Cons(2_i32, Nil))), Nil))");
+                      "(:println, ((:conj, (1_i32, (2_i32, Nil))), Nil))");
 }
 
 #[test]
 fn test_value_after_function() {
     assert_parse_tree("(println (add 1 2) 3)",
-                      "Cons(:println, Cons(Cons(:add, Cons(1_i32, Cons(2_i32, Nil))), \
-                       Cons(3_i32, Nil)))");
+                      "(:println, ((:add, (1_i32, (2_i32, Nil))), \
+                       (3_i32, Nil)))");
 }

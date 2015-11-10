@@ -15,7 +15,7 @@ expression -> Box<Node>
     / atom
 
 list -> Box<Node>
-    = "(" e:sexpression ")" { e }
+    = "(" _ e:sexpression _ ")" { e }
     / "()" { Box::new(Node::Nil) }
 
 sexpression -> Box<Node>

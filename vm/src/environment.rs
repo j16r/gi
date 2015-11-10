@@ -31,8 +31,17 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
 fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     if let box Node::Value(Value::Bool(expression)) = env.eval(&first(args)) {
+        let clauses = &rest(args);
         if expression {
-            return env.eval(&rest(args));
+            //println!("  expression is true!");
+            let result = env.eval(&first(clauses));
+            //println!("  returning {:?}", result);
+            return result;
+        } else {
+            //println!("  expression is false!");
+            let result = env.eval(&rest(clauses));
+            //println!("  returning {:?}", result);
+            return first(&result);
         }
     } else {
         panic!("first argument to cond must be an Bool, got {:?}", args);
@@ -44,6 +53,8 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
 fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = env.eval(&first(args));
     let rhs = env.eval(&first(&rest(args)));
+
+    //println!("  {:?} == {:?}", lhs, rhs);
 
     box Node::Value(Value::Bool(*lhs == *rhs))
 }
@@ -82,6 +93,9 @@ fn def(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
 fn lambda(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = first(args);
     let body = rest(args);
+
+    //println!("Created lambda {:?} => {:?}", lhs, body);
+
     box Node::Lambda(lhs, body)
 }
 
@@ -112,12 +126,13 @@ impl Environment {
     }
 
     pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
+        //println!("Evaluating {:?}", token);
         match *token {
             box Cons(ref head, ref tail) => {
                 match *head {
                     box Cons(box Lambda(ref args, ref body), _) => {
-                        self.invoke_lambda(args, body, tail)
-                    }
+                        self.execute_lambda(args, tail, body)
+                    },
                     box Atom(ref value) if value == "lambda" => lambda(self, tail),
                     box Atom(ref value) => self.invoke_function(value, tail),
                     _ => {
@@ -131,27 +146,44 @@ impl Environment {
         }
     }
 
-    fn register_arg(&mut self, args: &Box<Node>, params: &Box<Node>) {
+    // insert_parameters replaces each instance of the atom from args with its corresponding parameter
+    fn insert_parameters(&mut self, token: &Box<Node>, args: &Box<Node>, params: &Box<Node>) -> Box<Node> {
         let arg = match first(args) {
             box Atom(name) => name,
             _ => panic!("Argument definition is not an identifier"),
         };
         let param = &first(params);
-        self.register(arg, custom(param.clone()));
 
-        match rest(params) {
-            box Nil => return,
-            _ => self.register_arg(&rest(args), &rest(param)),
+        match *token {
+            box Atom(ref value) if *value == arg => param.clone(),
+            box Cons(ref head, ref tail) => {
+                let new_head = self.insert_parameters(head, args, params);
+                let new_tail = self.insert_parameters(tail, args, params);
+                box Cons(new_head, new_tail)
+            },
+            _ => token.clone(),
         }
     }
 
-    fn invoke_lambda(&mut self,
-                     args: &Box<Node>,
-                     body: &Box<Node>,
-                     params: &Box<Node>)
-                     -> Box<Node> {
-        self.register_arg(args, params);
-        self.eval(body)
+    // execute_lambda performs an eval over the body of the lambda function, splicing in the
+    // parameters
+    //
+    // args = the identifiers of expected arguments, e.g:
+    // lambda (value)
+    // then args = [value]
+    //
+    // params = the values passed in, in order, i.e. if lambda is called like so:
+    // (lambda 1)
+    // then params = [1]
+    // 
+    // body is the actual code to execute
+    fn execute_lambda(&mut self,
+                      args: &Box<Node>,
+                      params: &Box<Node>,
+                      body: &Box<Node>) -> Box<Node> {
+        //println!("execing lambda\n\targs: {:?}\n\tparams: {:?}\n\tbody: {:?}", args, params, body);
+        let new_body = self.insert_parameters(body, args, params);
+        self.eval(&new_body)
     }
 
     fn function(&self, name: &String) -> FunctionBody {
@@ -165,19 +197,24 @@ impl Environment {
     }
 
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
-        match self.function(name) {
+        let result = match self.function(name) {
             FunctionBody::Reserved(ref body) => {
+                //println!("Invoking reserved function {:?} {:?}", name, args);
                 body(self, args)
             }
             FunctionBody::Default(ref body) => {
+                //println!("Invoking default function {:?} {:?}", name, args);
                 let result = &self.eval(args);
                 body(self, result)
             }
             FunctionBody::Custom(ref body) => {
+                //println!("Invoking custom function {:?} {:?}", name, args);
                 let result = &self.eval(args);
                 let function = box Node::Cons(body.clone(), result.clone());
-                self.eval(&function)
+                first(&self.eval(&function))
             }
-        }
+        };
+        //println!("{:?} => {:?}", name, result);
+        result
     }
 }
