@@ -9,4 +9,7 @@ fn lambda_test() {
     verify_output(
         r#"(def square (lambda (x) (mul x x))) (dump (square 9))"#,
         "81_i32");
+    verify_output(
+        r#"(def multiply (lambda (x y) (mul x y))) (dump (multiply 7 6))"#,
+        "42_i32");
 }

@@ -154,7 +154,7 @@ impl Environment {
         };
         let param = &first(params);
 
-        match *token {
+        let new_body = match *token {
             box Atom(ref value) if *value == arg => param.clone(),
             box Cons(ref head, ref tail) => {
                 let new_head = self.insert_parameters(head, args, params);
@@ -162,6 +162,11 @@ impl Environment {
                 box Cons(new_head, new_tail)
             },
             _ => token.clone(),
+        };
+
+        match rest(args) {
+            box Node::Nil => return new_body,
+            _ => self.insert_parameters(&new_body, &rest(args), &rest(params))
         }
     }
 
