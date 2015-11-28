@@ -113,3 +113,10 @@ fn test_value_after_function() {
                       "(:println, ((:add, (1_i32, (2_i32, Nil))), \
                        (3_i32, Nil)))");
 }
+
+#[test]
+fn test_function() {
+    assert_parse_tree("fn echo(x)\n(dump :core)\nend",
+                      "(:println, ((:add, (1_i32, (2_i32, Nil))), \
+                       (3_i32, Nil)))");
+}

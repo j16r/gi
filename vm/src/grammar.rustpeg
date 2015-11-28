@@ -8,11 +8,18 @@ parse -> Box<Node>
     / whitespace* { Box::new(Node::Nil) }
 
 expression -> Box<Node>
-    = list
+    = function
+    / list
     / string
     / integer
     / bool
     / atom
+
+function -> Box<Node>
+    = "fn " function_identifier "(" _ args:sexpression _ ")" eol _ body:sexpression _ "end" { Box::new(Node::Lambda(args, body)) }
+
+function_identifier -> Box<Node>
+    = [^( \t\r\n]+ { Box::new(Node::Atom(match_str.to_string())) }
 
 list -> Box<Node>
     = "(" _ e:sexpression _ ")" { e }
@@ -49,6 +56,10 @@ atom -> Box<Node>
 
 whitespace
     = [ \t\r\n]
+
+eol
+    = [\r\n]
+    / [\n]
 
 _
     = whitespace*
