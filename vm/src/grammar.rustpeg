@@ -34,18 +34,18 @@ string -> Box<Node>
     = "\"" s:string_body "\"" { s }
 
 string_body -> Box<Node>
-    = [^"]* { Box::new(Node::Value(Value::U8String(match_str.to_string()))) }
+    = token:$([^"]*) { Box::new(Node::Value(Value::U8String(token.to_string()))) }
 
 integer -> Box<Node>
-    = [1-9][0-9]* {
-      Box::new(Node::Value(Value::Integer32(match_str.parse().unwrap())))
+    = token:$([1-9][0-9]*) {
+      Box::new(Node::Value(Value::Integer32(token.parse().unwrap())))
     }
-    / [0-9] {
-      Box::new(Node::Value(Value::Integer32(match_str.parse().unwrap())))
+    / token:$([0-9]) {
+      Box::new(Node::Value(Value::Integer32(token.parse().unwrap())))
     }
 
 atom -> Box<Node>
-    = [^) \t\r\n]+ { Box::new(Node::Atom(match_str.to_string())) }
+    = token:$([^) \t\r\n]+) { Box::new(Node::Atom(token.to_string())) }
 
 whitespace
     = [ \t\r\n]

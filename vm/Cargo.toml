@@ -4,6 +4,6 @@ name = "gi_vm"
 version = "0.0.1"
 authors = ["John Barker <jebarker@gmail.com>"]
 
-[dependencies.peg]
+[dependencies]
 
-version = "*"
+peg-syntax-ext = "0.4.0"
