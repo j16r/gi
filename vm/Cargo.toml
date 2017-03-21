@@ -5,5 +5,4 @@ version = "0.0.1"
 authors = ["John Barker <jebarker@gmail.com>"]
 
 [dependencies]
-
-peg-syntax-ext = "0.4.0"
+peg-syntax-ext = "*"
