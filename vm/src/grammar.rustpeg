@@ -19,7 +19,7 @@ function -> Box<Node>
     = "fn " function_identifier "(" _ args:sexpression _ ")" eol _ body:sexpression _ "end" { Box::new(Node::Lambda(args, body)) }
 
 function_identifier -> Box<Node>
-    = [^( \t\r\n]+ { Box::new(Node::Atom(match_str.to_string())) }
+    = token:$([^( \t\r\n]+) { Box::new(Node::Atom(token.to_string())) }
 
 list -> Box<Node>
     = "(" _ e:sexpression _ ")" { e }
