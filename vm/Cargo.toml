@@ -5,4 +5,5 @@ version = "0.0.1"
 authors = ["John Barker <jebarker@gmail.com>"]
 
 [dependencies]
+lalrpop = "*"
 peg-syntax-ext = "*"
