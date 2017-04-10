@@ -1,20 +1,18 @@
 #![feature(box_syntax)]
 #![feature(box_patterns)]
-#![feature(libc)]
 
 #![feature(plugin)]
-#![plugin(peg_syntax_ext)]
 
 extern crate libc;
+extern crate lalrpop_util;
 
 use std::io::{Cursor, Read};
-use libc::*;
-
 use loader::Loader;
 
 mod ast;
 mod environment;
 mod functions;
+mod grammar;
 mod lib;
 mod loader;
 mod parser;
@@ -38,7 +36,6 @@ fn print_usage() {
             ...\n\n\trun <filename>\tRun some gi source code\n");
 }
 
-#[cfg(unix)]
 fn stdio_isatty() -> bool {
     unsafe { libc::isatty(libc::STDIN_FILENO) != 0 }
 }

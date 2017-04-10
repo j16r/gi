@@ -1,0 +1,51 @@
+// vim: syntax=rust
+grammar;
+
+use ast::Node;
+use ast::Value;
+
+// Token precedence ordering
+match {
+  "true",
+  "false",
+  r"(0|[1-9][0-9]*)" => tInteger,
+  r#""(?:[^"\\]|\\.)*""# => tString,
+  r"\s+" => SWS,
+} else {
+  r"\w+" => tAtom,
+  _
+}
+
+pub Program: Box<Node> = {
+  "()" => Box::new(Node::Nil),
+  Expression,
+  <first:Expression> <rest:Expression> => Box::new(Node::Cons(first, rest)),
+};
+
+Expression = {
+  LiteralBool,
+  LiteralInteger,
+  LiteralString,
+  Atom,
+  List,
+};
+
+List: Box<Node> = "(" <expression:(<Expression>)*> ")" => {
+  expression.into_iter().rev().fold(Box::new(Node::Nil), |accumulator, argument| {
+    Box::new(Node::Cons(Box::new(*argument), accumulator))
+  })
+};
+
+Atom: Box<Node> = <value:tAtom> => Box::new(Node::Atom(value.into()));
+
+LiteralString: Box<Node> = <value:tString> => {
+  Box::new(Node::Value(Value::U8String(value[1..value.len() - 1].into())))
+};
+
+LiteralInteger: Box<Node> = <value:tInteger> => 
+  Box::new(Node::Value(Value::Integer32(value.parse().unwrap())));
+
+LiteralBool: Box<Node> = {
+  "true" => Box::new(Node::Value(Value::Bool(true))),
+  "false" => Box::new(Node::Value(Value::Bool(false))),
+};

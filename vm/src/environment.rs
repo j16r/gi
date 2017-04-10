@@ -1,5 +1,5 @@
 use ast::Node::{self, Nil, Atom, Cons, Lambda};
-use ast::Value::{self, Bool};
+use ast::Value::Bool;
 use functions::{reserved, custom, FunctionTable, FunctionBody};
 use lib;
 
@@ -30,7 +30,7 @@ fn rest_fn(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 }
 
 fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
-    if let box Node::Value(Value::Bool(expression)) = env.eval(&first(args)) {
+    if let box Node::Value(Bool(expression)) = env.eval(&first(args)) {
         let clauses = &rest(args);
         if expression {
             //println!("  expression is true!");
@@ -46,8 +46,6 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     } else {
         panic!("first argument to cond must be an Bool, got {:?}", args);
     }
-
-    box Node::Nil
 }
 
 fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
@@ -56,7 +54,7 @@ fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
 
     //println!("  {:?} == {:?}", lhs, rhs);
 
-    box Node::Value(Value::Bool(*lhs == *rhs))
+    box Node::Value(Bool(*lhs == *rhs))
 }
 
 fn quote(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
@@ -68,7 +66,7 @@ fn atom(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
         box Node::Value(_) => true,
         _ => false,
     };
-    box Node::Value(Value::Bool(result))
+    box Node::Value(Bool(result))
 }
 
 fn cons(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
@@ -165,7 +163,7 @@ impl Environment {
         };
 
         match rest(args) {
-            box Node::Nil => return new_body,
+            box Nil => return new_body,
             _ => self.insert_parameters(&new_body, &rest(args), &rest(params))
         }
     }

@@ -3,7 +3,16 @@
 name = "gi_vm"
 version = "0.0.1"
 authors = ["John Barker <jebarker@gmail.com>"]
+build = "build.rs"
 
-[dependencies]
-lalrpop = "*"
-peg-syntax-ext = "*"
+[dependencies.libc]
+version = "0.2.21"
+
+[dependencies.regex]
+version = "0.2.1"
+
+[dependencies.lalrpop-util]
+version = "0.13.0"
+
+[build-dependencies.lalrpop]
+version = "0.13.0"

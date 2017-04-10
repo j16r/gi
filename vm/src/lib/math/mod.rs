@@ -1,4 +1,4 @@
-use ast::Node::{self, Nil};
+use ast::Node;
 use ast::Value::Integer32;
 use environment::{Environment, first, rest};
 use functions::default;
@@ -35,7 +35,6 @@ fn add(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     } else {
         panic!("can't add {:?}", lhs);
     }
-    box Node::Nil
 }
 
 fn sub(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
@@ -51,7 +50,6 @@ fn sub(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     } else {
         panic!("can't add {:?}", lhs);
     }
-    box Node::Nil
 }
 
 fn mul(_: &mut Environment, args: &Box<Node>) -> Box<Node> {

@@ -1,5 +1,3 @@
-#![feature(convert)]
-
 mod support;
 use support::verify_output;
 
