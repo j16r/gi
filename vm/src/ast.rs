@@ -14,6 +14,7 @@ pub enum Node {
     Cons(Box<Node>, Box<Node>),
     Value(Value),
     Lambda(Box<Node>, Box<Node>),
+    Function(String, Vec<Box<Node>>, Box<Node>)
 }
 
 impl fmt::Debug for Value {
@@ -44,6 +45,7 @@ impl fmt::Debug for Node {
             Node::Cons(ref first, ref rest) => write!(formatter, "({:?}, {:?})", first, rest),
             Node::Value(ref val) => write!(formatter, "{:?}", val),
             Node::Lambda(ref args, ref body) => write!(formatter, "'({:?}, {:?})", args, body),
+            Node::Function(ref name, _, _) => write!(formatter, "f {}()", name),
         }
     }
 }
@@ -56,6 +58,7 @@ impl fmt::Display for Node {
             Node::Cons(ref first, ref rest) => write!(formatter, "{}, {}", first, rest),
             Node::Value(ref val) => write!(formatter, "{}", val),
             Node::Lambda(ref args, ref body) => write!(formatter, "'({}, {})", args, body),
+            Node::Function(ref name, _, _) => write!(formatter, "f {}()", name),
         }
     }
 }

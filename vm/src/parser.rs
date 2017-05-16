@@ -69,6 +69,7 @@ fn assert_parse_tree(input: &str, output: &str) {
     assert_eq!(formatted, output.to_string());
 }
 
+// FIXME: Not sure how to do this with LALRPOP
 //#[test]
 //fn test_parse_empty_program() {
     //assert_parse_tree("", "Nil");
@@ -91,6 +92,11 @@ fn test_bool() {
 #[test]
 fn test_parse_function() {
     assert_parse_tree("(abort)", "(:abort, Nil)");
+}
+
+#[test]
+fn test_parse_function_literal() {
+    assert_parse_tree("f abort() {}", "f abort()");
 }
 
 #[test]
