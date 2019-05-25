@@ -16,6 +16,7 @@ mod grammar;
 mod lib;
 mod loader;
 mod parser;
+mod variables;
 
 fn run(files: &[String]) {
     let mut loader = Loader::new();

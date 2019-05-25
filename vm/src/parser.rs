@@ -74,57 +74,60 @@ fn assert_parse_tree(input: &str, output: &str) {
     //assert_parse_tree("", "Nil");
 //}
 
-#[test]
-fn test_parse_empty_list() {
-    assert_parse_tree("()", "Nil");
-    assert_parse_tree("( )", "Nil");
-}
+//#[test]
+//fn test_parse_empty_list() {
+    //assert_parse_tree("()", "Nil");
+    //assert_parse_tree("( )", "Nil");
+//}
+
+//#[test]
+//fn test_bool() {
+    //assert_parse_tree("true", "true");
+    //assert_parse_tree("false", "false");
+    //assert_parse_tree("(true)", "(true, Nil)");
+    //assert_parse_tree("(false)", "(false, Nil)");
+//}
+
+//#[test]
+//fn test_parse_string_literal() {
+    //assert_parse_tree("\"hello\"", "\"hello\"");
+    //assert_parse_tree("\"nested \\\"string\\\"\"", "\"nested \\\"string\\\"\"");
+    //assert_parse_tree("(println \"string\")",
+                      //"(:println, (\"string\", Nil))");
+//}
+
+//#[test]
+//fn test_parse_integer() {
+    //assert_parse_tree("1", "1_i32");
+    //assert_parse_tree("10", "10_i32");
+    //assert_parse_tree("0", "0_i32");
+//}
+
+//#[test]
+//fn test_parse_nested_function() {
+    //assert_parse_tree("println(conj(1 2))",
+                      //"(:println, ((:conj, (1_i32, (2_i32, Nil))), Nil))");
+//}
+
+//#[test]
+//fn test_value_after_function() {
+    //assert_parse_tree("println((add 1 2) 3)",
+                      //"(:println, ((:add, (1_i32, (2_i32, Nil))), \
+                       //(3_i32, Nil)))");
+//}
+
+//#[test]
+//fn test_multiple_expressions() {
+    //assert_parse_tree("(println 3) (println 9)",
+                      //"((:println, (3_i32, Nil)), (:println, (9_i32, Nil)))");
+    //assert_parse_tree("(println 7)(println 11)",
+                      //"((:println, (7_i32, Nil)), (:println, (11_i32, Nil)))");
+//}
 
 #[test]
-fn test_bool() {
-    assert_parse_tree("true", "true");
-    assert_parse_tree("false", "false");
-    assert_parse_tree("(true)", "(true, Nil)");
-    assert_parse_tree("(false)", "(false, Nil)");
-}
-
-#[test]
-fn test_parse_function() {
-    assert_parse_tree("(abort)", "(:abort, Nil)");
-}
-
-#[test]
-fn test_parse_string_literal() {
-    assert_parse_tree("\"hello\"", "\"hello\"");
-    assert_parse_tree("\"nested \\\"string\\\"\"", "\"nested \\\"string\\\"\"");
-    assert_parse_tree("(println \"string\")",
-                      "(:println, (\"string\", Nil))");
-}
-
-#[test]
-fn test_parse_integer() {
-    assert_parse_tree("1", "1_i32");
-    assert_parse_tree("10", "10_i32");
-    assert_parse_tree("0", "0_i32");
-}
-
-#[test]
-fn test_parse_nested_function() {
-    assert_parse_tree("(println (conj 1 2))",
-                      "(:println, ((:conj, (1_i32, (2_i32, Nil))), Nil))");
-}
-
-#[test]
-fn test_value_after_function() {
-    assert_parse_tree("(println (add 1 2) 3)",
-                      "(:println, ((:add, (1_i32, (2_i32, Nil))), \
-                       (3_i32, Nil)))");
-}
-
-#[test]
-fn test_multiple_expressions() {
-    assert_parse_tree("(println 3) (println 9)",
-                      "((:println, (3_i32, Nil)), (:println, (9_i32, Nil)))");
-    assert_parse_tree("(println 7)(println 11)",
-                      "((:println, (7_i32, Nil)), (:println, (11_i32, Nil)))");
+fn test_function_application_expression() {
+    assert_parse_tree("println(3)",
+                      "println((3_i32, Nil))");
+    assert_parse_tree("println(3) println(9)",
+                      "(println((3_i32, Nil)), println((9_i32, Nil)))");
 }

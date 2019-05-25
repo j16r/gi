@@ -25,6 +25,7 @@ fn dumpln(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
 }
 
 fn dump(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
+    eprintln!("dump {:?}", args);
     match *args {
         box Node::Cons(ref lhs_token, _) => print!("{:?}", lhs_token),
         _ => print!("{:?}", args),

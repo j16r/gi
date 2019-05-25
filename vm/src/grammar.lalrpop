@@ -1,11 +1,12 @@
 // vim: syntax=rust
 grammar;
 
-use ast::Node;
-use ast::Value;
+use ast::{Node, Value};
 
 // Token precedence ordering
 match {
+  "let" => tLet,
+  "fn" => tFn,
   "true",
   "false",
   r"(0|[1-9][0-9]*)" => tInteger,
@@ -26,25 +27,53 @@ Expression = {
   LiteralBool,
   LiteralInteger,
   LiteralString,
+  Let,
+  FunctionDefinition,
+  FunctionApplication,
   Atom,
-  List,
 };
 
-List: Box<Node> = "(" <expression:(<Expression>)*> ")" => {
-  expression.into_iter().rev().fold(Box::new(Node::Nil), |accumulator, argument| {
-    Box::new(Node::Cons(Box::new(*argument), accumulator))
-  })
+// let foo = 1
+Let: Box<Node> = tLet <atom:Atom> "=" <expression:Expression> => {
+  Box::new(Node::Let(atom, expression))
 };
 
+// fn mul(a b)
+FunctionDefinition: Box<Node> = tFn <name:tAtom> "(" <arguments:(<Expression>)*> ")"
+  "{" <body:Expression> "}" => {
+
+  Box::new(
+    Node::Function(
+      name.into(),
+      arguments.into_iter().rev().fold(Box::new(Node::Nil), |accumulator, argument| {
+        Box::new(Node::Cons(Box::new(*argument), accumulator))
+      }),
+      body))
+};
+
+// mul(1 2)
+FunctionApplication: Box<Node> = <atom:tAtom> "(" <expression:(<Expression>)*> ")" => {
+  Box::new(
+    Node::FunctionApplication(
+      atom.into(),
+      expression.into_iter().rev().fold(Box::new(Node::Nil), |accumulator, argument| {
+        Box::new(Node::Cons(Box::new(*argument), accumulator))
+      })))
+};
+
+// mul
 Atom: Box<Node> = <value:tAtom> => Box::new(Node::Atom(value.into()));
 
+// "hello \" world"
 LiteralString: Box<Node> = <value:tString> => {
   Box::new(Node::Value(Value::U8String(value[1..value.len() - 1].into())))
 };
 
-LiteralInteger: Box<Node> = <value:tInteger> => 
+// 1029
+LiteralInteger: Box<Node> = <value:tInteger> =>
   Box::new(Node::Value(Value::Integer32(value.parse().unwrap())));
 
+// true
 LiteralBool: Box<Node> = {
   "true" => Box::new(Node::Value(Value::Bool(true))),
   "false" => Box::new(Node::Value(Value::Bool(false))),

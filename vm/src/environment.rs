@@ -1,10 +1,12 @@
-use ast::Node::{self, Nil, Atom, Cons, Lambda};
+use ast::Node::{self, Nil, Atom, Cons, Lambda, Function, FunctionApplication, Let};
 use ast::Value::Bool;
 use functions::{reserved, custom, FunctionTable, FunctionBody};
+use variables::{VariableTable};
 use lib;
 
 pub struct Environment {
     functions: FunctionTable,
+    variables: VariableTable,
 }
 
 pub fn first(args: &Box<Node>) -> Box<Node> {
@@ -33,14 +35,14 @@ fn cond(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     if let box Node::Value(Bool(expression)) = env.eval(&first(args)) {
         let clauses = &rest(args);
         if expression {
-            //println!("  expression is true!");
+            eprintln!("  expression is true!");
             let result = env.eval(&first(clauses));
-            //println!("  returning {:?}", result);
+            eprintln!("  returning {:?}", result);
             return result;
         } else {
-            //println!("  expression is false!");
+            eprintln!("  expression is false!");
             let result = env.eval(&rest(clauses));
-            //println!("  returning {:?}", result);
+            eprintln!("  returning {:?}", result);
             return first(&result);
         }
     } else {
@@ -52,7 +54,7 @@ fn equal(env: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = env.eval(&first(args));
     let rhs = env.eval(&first(&rest(args)));
 
-    //println!("  {:?} == {:?}", lhs, rhs);
+    eprintln!("  {:?} == {:?}", lhs, rhs);
 
     box Node::Value(Bool(*lhs == *rhs))
 }
@@ -92,7 +94,7 @@ fn lambda(_: &mut Environment, args: &Box<Node>) -> Box<Node> {
     let lhs = first(args);
     let body = rest(args);
 
-    //println!("Created lambda {:?} => {:?}", lhs, body);
+    eprintln!("Created lambda {:?} => {:?}", lhs, body);
 
     box Node::Lambda(lhs, body)
 }
@@ -110,7 +112,10 @@ fn register(env: &mut Environment) {
 
 impl Environment {
     pub fn new() -> Box<Environment> {
-        let mut environment = Environment { functions: FunctionTable::new() };
+        let mut environment = Environment {
+            functions: FunctionTable::new(),
+            variables: VariableTable::new(),
+        };
 
         register(&mut environment);
         lib::io::register(&mut environment);
@@ -123,17 +128,26 @@ impl Environment {
         self.functions.insert(name, function);
     }
 
+    pub fn define_function(&mut self, name: &String, body: &Box<Node>) -> Box<Node> {
+        self.functions.insert(name.clone(), custom(body.clone()));
+        body.clone()
+    }
+
     pub fn eval(&mut self, token: &Box<Node>) -> Box<Node> {
-        //println!("Evaluating {:?}", token);
+        eprintln!("Evaluating {:?}", token);
         match *token {
+            box Function(ref name, _, ref body) => self.define_function(name, body),
+            box FunctionApplication(ref ident, ref args) => self.invoke_function(ident, args),
+            box Let(ref name, ref value) => self.register_label(name, value),
+            box Atom(ref name) => self.load_variable(name), // , tail),
             box Cons(ref head, ref tail) => {
                 match *head {
                     box Cons(box Lambda(ref args, ref body), _) => {
                         self.execute_lambda(args, tail, body)
                     },
-                    box Atom(ref value) if value == "lambda" => lambda(self, tail),
-                    box Atom(ref value) => self.invoke_function(value, tail),
+                    box Atom(ref name) if name == "lambda" => lambda(self, tail),
                     _ => {
+                        eprintln!("eval else...");
                         let head_result = self.eval(head);
                         let tail_result = self.eval(tail);
                         box Cons(head_result, tail_result)
@@ -142,6 +156,16 @@ impl Environment {
             }
             _ => token.clone(),
         }
+    }
+
+    fn register_label(&mut self, name: &Box<Node>, value: &Box<Node>) -> Box<Node> {
+        if let &box Node::Atom(ref name) = name {
+            eprintln!("Registered {:?} = {:?}", name, value);
+            self.functions.insert(name.clone(), custom(value.clone()));
+        } else {
+            panic!("Expecting name to be a String, got {:?}", name);
+        }
+        value.clone()
     }
 
     // insert_parameters replaces each instance of the atom from args with its corresponding parameter
@@ -178,13 +202,13 @@ impl Environment {
     // params = the values passed in, in order, i.e. if lambda is called like so:
     // (lambda 1)
     // then params = [1]
-    // 
+    //
     // body is the actual code to execute
     fn execute_lambda(&mut self,
                       args: &Box<Node>,
                       params: &Box<Node>,
                       body: &Box<Node>) -> Box<Node> {
-        //println!("execing lambda\n\targs: {:?}\n\tparams: {:?}\n\tbody: {:?}", args, params, body);
+        eprintln!("execing lambda\n\targs: {:?}\n\tparams: {:?}\n\tbody: {:?}", args, params, body);
         let new_body = self.insert_parameters(body, args, params);
         self.eval(&new_body)
     }
@@ -199,25 +223,36 @@ impl Environment {
             .clone()
     }
 
+    fn load_variable(&mut self, name: &String) -> Box<Node> {
+        eprintln!("Looking up {:?}...", name);
+        self.variables
+            .get(name)
+            .unwrap_or_else(|| {
+                panic!("Tried to use variable {} but there was none in scope",
+                       name)
+            })
+            .clone()
+    }
+
     fn invoke_function(&mut self, name: &String, args: &Box<Node>) -> Box<Node> {
         let result = match self.function(name) {
             FunctionBody::Reserved(ref body) => {
-                //println!("Invoking reserved function {:?} {:?}", name, args);
+                eprintln!("Invoking reserved function {:?} {:?}", name, args);
                 body(self, args)
             }
             FunctionBody::Default(ref body) => {
-                //println!("Invoking default function {:?} {:?}", name, args);
+                eprintln!("Invoking default function {:?} {:?}", name, args);
                 let result = &self.eval(args);
                 body(self, result)
             }
             FunctionBody::Custom(ref body) => {
-                //println!("Invoking custom function {:?} {:?}", name, args);
+                eprintln!("Invoking custom function {:?} {:?}", name, args);
                 let result = &self.eval(args);
                 let function = box Node::Cons(body.clone(), result.clone());
                 first(&self.eval(&function))
             }
         };
-        //println!("{:?} => {:?}", name, result);
+        eprintln!("{:?} => {:?}", name, result);
         result
     }
 }
